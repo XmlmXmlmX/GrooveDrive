@@ -1,0 +1,10 @@
+﻿.songs-container {
+    height: calc(100vh - 12rem) !important;
+    overflow: hidden;
+    overflow-y: auto;
+}
+
+::deep .current-song-thumbnail {
+    height: 5rem;
+    width: 5rem;
+}

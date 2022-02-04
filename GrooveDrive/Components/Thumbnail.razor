@@ -1,0 +1,37 @@
+﻿@using Microsoft.Graph
+
+<Spinner Show="isLoading" />
+
+@if (!string.IsNullOrWhiteSpace(url))
+{
+    <img src="@url" class="ratio ratio-1x1 @CssClass">
+}
+else
+{
+    <span class="ratio ratio-1x1 @CssClass">
+        <span class="oi oi-musical-note fs-6" aria-hidden="true"></span>
+    </span>
+}
+
+@code {
+    private bool isLoading;
+    private string? url;
+
+    [Parameter, EditorRequired]
+    public DriveItem Item { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    protected override void OnInitialized()
+    {
+        isLoading = true;
+
+        if (Item is not null && Item.Thumbnails is not null && Item.Thumbnails.Count > 0)
+        {
+            url = Item.Thumbnails[0].Medium?.Url;
+        }
+
+        isLoading = false;
+    }
+}

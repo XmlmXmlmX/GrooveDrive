@@ -1,0 +1,14 @@
+﻿@if (Show)
+{
+    <div class="w-100 h-100 d-flex justify-content-center align-items-center">
+        <div class="spinner-grow text-primary" role="status">
+            <span class="oi oi-musical-note text-light position-absolute top-50 start-50 translate-middle" aria-hidden="true"></span>
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool Show { get; set; }
+}

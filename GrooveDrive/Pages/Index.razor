@@ -1,0 +1,275 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Graph
+@using System.Text.Json
+@attribute [Authorize]
+@inject GraphServiceClient _graphClient
+@inject IJSRuntime _js
+@implements IDisposable
+
+<PageTitle>
+    @if (currentSong is not null)
+    {
+        @GetTitle(currentSong)
+    }
+    else
+    {
+        @pageTitle
+    }
+</PageTitle>
+
+@if (driveItems is not null && driveItems.Count > 0)
+{
+    <span class="badge rounded-pill bg-light text-dark mb-3">Songs: @driveItems.Count</span>
+}
+@*<div class="input-group mb-3">
+    <InputText type="search" class="form-control form-control-lg rounded-pill text-center" @bind-Value="searchQuery" placeholder="Discover"></InputText>
+    <span class="input-group-text bg-white">
+        <NavLink class="link-dark" @onclick="ClearSearchQuery">&times;</NavLink>
+    </span>
+    <button class="btn btn-outline-secondary" @onclick="OnInitializedAsync">
+        <span class="oi oi-magnifying-glass fs-6" aria-hidden="true"></span>
+    </button>
+</div>*@
+<div class="songs-container" id="songs_container" onscroll="DotNet.invokeMethod('GrooveDrive', 'CheckScrollPosition', this.scrollTop, this.scrollHeight)">
+    @if (driveItems is not null && driveItems.Count > 0)
+    {
+        <div class="row row-cols-2 row-cols-md-4 row-cols-lg-8 g-4 mb-5">
+            @foreach (var item in driveItems)
+            {
+                <div class="col">
+                    <div class="card h-100 text-white bg-dark">
+                        <NavLink @onclick="@(() => StreamItem(item))">
+                            <Thumbnail Item="item" CssClass="card-img-top" />
+                        </NavLink>
+                        <div class="card-body">
+                            <h5 class="card-title">@GetTitle(item)</h5>
+                            <p class="card-text">
+                                @item.Audio?.Album
+                                @item.Audio?.Artist
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    <Spinner Show="isLoading" />
+</div>
+
+<div class="d-flex align-items-center justify-content-between">
+    @if (currentSong is not null)
+    {
+        <Thumbnail Item="currentSong" CssClass="current-song-thumbnail me-3" />
+        <div class="d-flex flex-column">
+                <span class="fs-5">@GetTitle(currentSong)</span>
+                @if (currentSong.Audio is not null)
+                {
+                    <strong class="fs-6">@currentSong.Audio?.Artist</strong>
+                }
+        </div>
+    }
+    <div class="d-flex flex-column flex-grow-1">
+        <div class="d-flex justify-content-center p-3">
+            <button type="button" class="btn btn-link @(random ? "text-primary" : "text-light")" @onclick="@(() => random = !random)">
+                <span class="oi oi-random"></span>
+                <span class="visually-hidden">Random</span>
+            </button>
+            <button type="button" class="btn btn-link">
+                <span class="oi oi-media-step-backward" @onclick="PreviousTrack"></span>
+                <span class="visually-hidden">Random</span>
+            </button>
+            @if (Equals(playerState, PlayerState.Pause))
+            {
+                <button type="button" class="btn btn-link">
+                    <span role="button" title="Play" class="oi oi-play-circle" onclick="GrooveDrive.player().play()"></span>
+                    <span class="visually-hidden">Random</span>
+                </button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-link">
+                    <span role="button" title="Play" class="oi oi-media-pause" onclick="GrooveDrive.player().pause()"></span>
+                    <span class="visually-hidden">Random</span>
+                </button>
+            }
+            <button type="button" class="btn btn-link">
+                <span role="button" title="Next" class="oi oi-media-step-forward" @onclick="NextTrack"></span>
+                <span class="visually-hidden">Random</span>
+            </button>
+            <button type="button" class="btn btn-link @(loop ? "text-primary" : "text-light")" @onclick="@(() => loop = !loop)">
+                <span class="oi oi-loop-square"></span>
+                <span class="visually-hidden">Loop</span>
+            </button>
+        </div>
+        <audio id="player" controls="controls" autoplay="autoplay" class="w-100" loop="@(driveItems?.Count == 1 && loop)" onended="@(loop ? "DotNet.invokeMethod('GrooveDrive', 'NextTrackInvokable')" : "")"></audio>
+    </div>
+</div>
+
+@code {
+    private List<DriveItem>? driveItems = new();
+    private IDriveItemSearchRequest? nextRequest;
+    private bool isLoading = true;
+    private string? streamSource;
+    private string? streamMediaType;
+    private string pageTitle => $"Groove Drive{(isLoading ? " Loading..." : "")}";
+    private PlayerState playerState = PlayerState.Stop;
+    private DriveItem? currentSong;
+    private static Action? _updateAction;
+    private static Action? _nextTrackAction;
+    private static Task? _updateTask;
+    private static Task? _nextTrackTask;
+    private bool loop = true;
+    private bool random = true;
+    private string? searchQuery { get; set; }
+
+    private string GetTitle(DriveItem item) => item is null ? "" : item.Audio is null ? item.Name : item.Audio.Title;
+
+    private async Task PreviousTrack()
+    {
+        if (driveItems is not null && currentSong is not null)
+        {
+            var indexOf = driveItems.IndexOf(currentSong);
+            var previousSong = driveItems[indexOf == driveItems.Count - 1 ? 0 : indexOf + 1];
+            await StreamItem(previousSong);
+        }
+    }
+
+    private async Task NextTrack()
+    {
+        if (driveItems is not null && currentSong is not null)
+        {
+            var indexOf = driveItems.IndexOf(currentSong);
+            var nextSong = driveItems[indexOf == 0 ? driveItems.Count - 1 : indexOf - 1];
+            await StreamItem(nextSong);
+        }
+    }
+
+    private async Task Play()
+    {
+        playerState = PlayerState.Play;
+        await _js.InvokeVoidAsync("GrooveDrive.play");
+    }
+
+    private async Task Pause()
+    {
+        playerState = PlayerState.Pause;
+        await _js.InvokeVoidAsync("GrooveDrive.pause");
+    }
+
+    private async Task HandleNextItems()
+    {
+        if (!isLoading && nextRequest is not null)
+        {
+            isLoading = true;
+
+            var nextResult = GetFilteredItemList(await nextRequest.GetAsync());
+
+            if (driveItems is not null)
+            {
+                driveItems.AddRange(nextResult);
+
+            }
+            else
+            {
+                driveItems = nextResult;
+            }
+        }
+
+        isLoading = false;
+    }
+
+    private static List<DriveItem> GetFilteredItemList(IEnumerable<DriveItem> items)
+    {
+        return items.ToList().Where(i => i.File is not null && i.File.MimeType.StartsWith("audio")).ToList();
+    }
+
+    private async Task StreamItem(DriveItem item)
+    {
+        currentSong = item;
+        var fileStream = await _graphClient.Me.Drive.Items[item.Id].Content
+            .Request()
+            .GetAsync();
+        var fileName = item.Name;
+
+        using var streamRef = new DotNetStreamReference(stream: fileStream);
+        playerState = PlayerState.Play;
+        await _js.InvokeVoidAsync("GrooveDrive.streamItem", fileName, streamRef);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+
+        //.ItemWithPath("Eigene Dateien/Music")
+        //.Expand("audio")
+        //var request2 = _graphClient.Me.Drive.Root.ItemWithPath("Eigene Dateien/Music").Children.Request();//.Filter("audio ne null");
+        var request2 = _graphClient.Me.Drive.Root.ItemWithPath("Music").Search($"{searchQuery}*.mp3").Request().Select("id,name,audio,file,thumbnails,webDavUrl").Expand("thumbnails").OrderBy("lastModifiedDateTime%20desc");
+        //https://graph.microsoft.com/v1.0/me/drive/root:/Music:/children?$select=id,name,audio,file,thumbnails&$filter=startsWith(file/mimeType,'audio')
+
+        // https://graph.microsoft.com/v1.0/me/drive/root:/Music:/search(q='*.mp3')?select=name,id,audio,file,thumbnails&$expand=thumbnails
+
+        // https://graph.microsoft.com/v1.0/me/drive/root/search(q='*.mp3')?select=name,id,audio,file,thumbnails&$expand=thumbnails
+        //var requestBuilder = _graphClient.Me.Drive.Root.Search("*.mp3");
+        //var url = requestBuilder.AppendSegmentToRequestUrl("$expand=thumbnails");
+
+        //GroupRequestBuilder builder = new GroupRequestBuilder(url, _graphClient);
+        //var result = await builder.Request().GetAsync();
+        //result.drive
+        var driveResult = await request2.GetAsync();
+
+        if (driveResult is not null)
+        {
+            nextRequest = driveResult.NextPageRequest;
+            driveItems = GetFilteredItemList(driveResult.CurrentPage);
+            _updateAction = HandleUpdate;
+            _nextTrackAction = HandleNextTrack;
+        }
+
+        isLoading = false;
+    }
+
+    [JSInvokable]
+    public static void CheckScrollPosition(int scrollTop, int scrollHeight)
+    {
+        if (scrollTop >= (scrollHeight - 1500))
+        {
+            _updateAction?.Invoke();
+        }
+    }
+
+    [JSInvokable]
+    public static void NextTrackInvokable()
+    {
+        _nextTrackAction?.Invoke();
+    }
+
+    private void HandleNextTrack()
+    {
+        if (_nextTrackTask is null || _nextTrackTask is not null && _nextTrackTask.IsCompleted)
+        {
+            _nextTrackTask = InvokeAsync(NextTrack);
+            //StateHasChanged();
+        }
+    }
+
+    private void HandleUpdate()
+    {
+        if (_updateTask is null || _updateTask is not null && _updateTask.IsCompleted)
+        {
+            _updateTask = InvokeAsync(HandleNextItems);
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        _updateTask?.Dispose();
+    }
+
+    private async Task ClearSearchQuery ()
+    {
+        searchQuery = null;
+        await OnInitializedAsync();
+    }
+}
