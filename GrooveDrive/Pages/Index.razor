@@ -31,7 +31,7 @@
                 <div class="col">
                     <div class="card h-100 text-white bg-dark">
                         <NavLink @onclick="@(() => StreamItem(item))">
-                            <Thumbnail Item="item" CssClass="card-img-top" />
+                            <AlbumThumbnail Item="item" CssClass="card-img-top" />
                         </NavLink>
                         <div class="card-body">
                             <h5 class="card-title">@GetTitle(item)</h5>
@@ -51,7 +51,7 @@
 <div class="d-flex align-items-center justify-content-between">
     @if (currentSong is not null)
     {
-        <Thumbnail Item="currentSong" CssClass="current-song-thumbnail me-3" />
+        <AlbumThumbnail Item="currentSong" CssClass="current-song-thumbnail me-3" />
         <div class="d-flex flex-column">
             <span class="fs-5">@GetTitle(currentSong)</span>
             @if (currentSong.Audio is not null)
