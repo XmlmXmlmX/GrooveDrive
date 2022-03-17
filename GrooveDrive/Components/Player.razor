@@ -1,0 +1,122 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Graph
+@using System.Text.Json
+@attribute [Authorize]
+
+@inject GraphServiceClient _graphClient
+@inject PlayerState _playerState
+@inject IJSRuntime _js
+
+<div class="fixed-bottom py-3 d-flex align-items-center justify-content-between">
+    @if (_playerState.CurrentSong is not null)
+    {
+        <AlbumThumbnail Item="_playerState.CurrentSong" CssClass="current-song-thumbnail me-3" style="width: 8rem; height: 8rem;" />
+        <div class="d-flex flex-column">
+            <span class="fs-5">@GetTitle(_playerState.CurrentSong)</span>
+            @if (_playerState.CurrentSong.Audio is not null)
+            {
+                <strong class="fs-6">@_playerState.CurrentSong.Audio?.Artist</strong>
+            }
+        </div>
+    }
+    <div class="d-flex flex-column flex-grow-1">
+        <div class="d-flex justify-content-center p-3">
+            <button type="button" class="btn btn-link @(_playerState.Random ? "text-primary" : "text-light")" @onclick="@(() => _playerState.ToggleRandom())">
+                <span class="oi oi-random"></span>
+                <span class="visually-hidden">Random</span>
+            </button>
+            <button type="button" class="btn btn-link">
+                <span class="oi oi-media-step-backward" @onclick="Previous"></span>
+                <span class="visually-hidden">Random</span>
+            </button>
+            @if (_playerState.IsLoading)
+            {
+                <Spinner />
+            }
+            else {
+                switch (_playerState.CurrentPlayState)
+                {                
+                    case PlayerStateType.Play:
+                        <button type="button" class="btn btn-link" @onclick="Pause">
+                            <span role="button" title="Pause" class="oi oi-media-pause"></span>
+                            <span class="visually-hidden">Pause</span>
+                        </button>
+                        break;
+                    case PlayerStateType.Pause:
+                    case PlayerStateType.Stop:
+                    case PlayerStateType.Unset:
+                        <button type="button" class="btn btn-link" @onclick="Play">
+                            <span role="button" title="Play" class="oi oi-play-circle"></span>
+                            <span class="visually-hidden">Play</span>
+                        </button>
+                        break;
+                }
+            }
+            <button type="button" class="btn btn-link">
+                <span role="button" title="Next" class="oi oi-media-step-forward" @onclick="Next"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+            <button type="button" class="btn btn-link @(_playerState.Repeat ? "text-primary" : "text-light")" @onclick="@(() => _playerState.ToggleRepeat())">
+                <span class="oi oi-loop-square"></span>
+                <span class="visually-hidden">Loop</span>
+            </button>
+        </div>
+        <div class="progress" style="height: 1px;">
+            <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <audio id="player" controls="controls" autoplay="autoplay" class="w-100 d-none" loop="@(_playerState.AllMusic?.Count() == 1 && _playerState.Repeat)" onended="@(_playerState.Repeat ? "DotNet.invokeMethod('GrooveDrive', 'NextTrackInvokable')" : "")" ontimeupdate="GrooveDrive.updateProgress(this)"></audio>
+    </div>
+</div>
+
+@code {
+    private static Action? _nextTrackAction;
+
+    private string GetTitle(DriveItem item) => item is null ? "" : item.Audio is null ? item.Name : item.Audio.Title;
+
+    private async Task StreamCurrentSong()
+    {
+        if (_playerState.CurrentSong is not null)
+        {
+            var fileStream = await _graphClient.Me.Drive.Items[_playerState.CurrentSong.Id].Content
+                .Request()
+                .GetAsync();
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+            await _js.InvokeVoidAsync("GrooveDrive.streamItem", _playerState.CurrentSong.Name, streamRef);
+        }
+    }
+
+    private void Play()
+    {
+        _playerState.Play();
+    }
+
+    private void Pause()
+    {
+        _playerState.Pause();
+    }
+
+    private void Next()
+    {
+        _playerState.NextTrack();
+    }
+
+    private void Previous()
+    {
+        _playerState.PreviousTrack();
+    }
+    
+    [JSInvokable]
+    public static void NextTrackInvokable()
+    {
+        _nextTrackAction?.Invoke();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await _playerState.LoadDataAsync();
+        await StreamCurrentSong();
+
+        _playerState.OnChange += StateHasChanged;
+        _playerState.OnStreamChange += StreamCurrentSong;
+    }
+}

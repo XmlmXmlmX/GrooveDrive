@@ -1,0 +1,30 @@
+﻿@page "/albums/{name}"
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Graph
+
+@attribute [Authorize]
+@inject PlayerState _playerState
+
+<PageTitle>Albums</PageTitle>
+
+@if (_playerState.IsLoading)
+{
+    <Spinner />
+}
+else
+{
+    <SongsContainer>
+        @foreach (var item in _playerState.AllMusic.Where(i => i.Audio is not null && !string.IsNullOrWhiteSpace(i.Audio.Album) && Equals(i.Audio?.Album, Name)))
+        {
+            <SongListItem Title="@GetTitle(item)" Text="@($"{item.Audio.Album}\n{item.Audio.Artist}")" DriveItem="item" ClickHandler="@(() => _playerState.Play(item))" />
+        }
+    </SongsContainer>
+}
+
+@code {
+    [Parameter, SupplyParameterFromQuery]
+    public string? Name { get; set; }
+
+    private string GetTitle(DriveItem item) => item is null ? "" : item.Audio is null ? item.Name : item.Audio.Title;
+}

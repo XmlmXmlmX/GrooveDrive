@@ -8,7 +8,7 @@
     <base href="/" />
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
-    <link href="GrooveDrive.styles.css" rel="stylesheet" />
+    <link href="GrooveDrive.styles.css?v1" rel="stylesheet" />
     <link href="manifest.json" rel="manifest" />
     <link rel="icon" type="image/svg" href="https://cdn.jsdelivr.net/npm/open-iconic@1.1.1/svg/musical-note.svg" />
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
@@ -33,21 +33,7 @@
     <script src="_content/Microsoft.Authentication.WebAssembly.Msal/AuthenticationService.js"></script>
     <script src="_framework/blazor.webassembly.js"></script>
     <script>navigator.serviceWorker.register('service-worker.js');</script>
-    <script>
-        window.GrooveDrive = window.GrooveDrive || {};
-        GrooveDrive.player = () => document.getElementById('player');
-        GrooveDrive.pageYOffset = function() {
-            return window.pageYOffset;
-        };
-        GrooveDrive.streamItem = async function(fileName, contentStreamReference) {
-            const arrayBuffer = await contentStreamReference.arrayBuffer();
-            const blob = new Blob([arrayBuffer]);
-            const url = URL.createObjectURL(blob);
-            GrooveDrive.player().src = url;
-        };
-        GrooveDrive.play = () => GrooveDrive.player().play();
-        GrooveDrive.pause = () => GrooveDrive.player().pause();
-    </script>
+    <script src="/js/player.js?v1"></script>
 </body>
 
 </html>

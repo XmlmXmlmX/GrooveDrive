@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject PlayerState _playerState
 
 <div class="page">
     <div class="sidebar">
@@ -15,4 +16,8 @@
             @Body
         </article>
     </main>
+
+    <AuthorizeView>
+        <Player />
+    </AuthorizeView>
 </div>

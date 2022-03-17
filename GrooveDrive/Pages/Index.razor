@@ -1,16 +1,15 @@
 ﻿@page "/"
+
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.Graph
-@using System.Text.Json
+
 @attribute [Authorize]
-@inject GraphServiceClient _graphClient
-@inject OneDriveMusicState _state
-@inject IJSRuntime _js
+@inject PlayerState _playerState
 
 <PageTitle>
-    @if (currentSong is not null)
+    @if (_playerState.CurrentSong is not null)
     {
-        <text>@GetTitle(currentSong) von @(currentSong.Audio?.Artist)</text>
+        <text>@GetTitle(_playerState.CurrentSong) von @(_playerState.CurrentSong.Audio?.Artist)</text>
     }
     else
     {
@@ -18,181 +17,27 @@
     }
 </PageTitle>
 
-@if (driveItems is not null && driveItems.Count > 0)
+@if (_playerState.IsLoading)
 {
-    <span class="badge rounded-pill bg-light text-dark mb-3">Songs: @driveItems.Count</span>
+    <Spinner />
 }
-<div class="songs-container" id="songs_container" onscroll="DotNet.invokeMethod('GrooveDrive', 'CheckScrollPosition', this.scrollTop, this.scrollHeight)">
-    @if (driveItems is not null && driveItems.Count > 0)
-    {
-        <div class="row row-cols-2 row-cols-md-4 row-cols-lg-8 g-4 mb-5">
-            @foreach (var item in driveItems)
-            {
-                <div class="col">
-                    <div class="card h-100 text-white bg-dark">
-                        <NavLink @onclick="@(() => StreamItem(item))">
-                            <AlbumThumbnail Item="item" CssClass="card-img-top" />
-                        </NavLink>
-                        <div class="card-body">
-                            <h5 class="card-title">@GetTitle(item)</h5>
-                            <p class="card-text">
-                                @item.Audio?.Album
-                                @item.Audio?.Artist
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    }
-    <Spinner Show="isLoading" />
-</div>
-
-<div class="d-flex align-items-center justify-content-between">
-    @if (currentSong is not null)
-    {
-        <AlbumThumbnail Item="currentSong" CssClass="current-song-thumbnail me-3" />
-        <div class="d-flex flex-column">
-            <span class="fs-5">@GetTitle(currentSong)</span>
-            @if (currentSong.Audio is not null)
-            {
-                <strong class="fs-6">@currentSong.Audio?.Artist</strong>
-            }
-        </div>
-    }
-    <div class="d-flex flex-column flex-grow-1">
-        <div class="d-flex justify-content-center p-3">
-            <button type="button" class="btn btn-link @(random ? "text-primary" : "text-light")" @onclick="@(() => random = !random)">
-                <span class="oi oi-random"></span>
-                <span class="visually-hidden">Random</span>
-            </button>
-            <button type="button" class="btn btn-link">
-                <span class="oi oi-media-step-backward" @onclick="PreviousTrack"></span>
-                <span class="visually-hidden">Random</span>
-            </button>
-            @if (Equals(playerState, PlayerState.Pause))
-            {
-                <button type="button" class="btn btn-link" @onclick="Play">
-                    <span role="button" title="Play" class="oi oi-play-circle"></span>
-                    <span class="visually-hidden">Random</span>
-                </button>
-            }
-            else
-            {
-                <button type="button" class="btn btn-link" @onclick="Pause">
-                    <span role="button" title="Play" class="oi oi-media-pause"></span>
-                    <span class="visually-hidden">Random</span>
-                </button>
-            }
-            <button type="button" class="btn btn-link">
-                <span role="button" title="Next" class="oi oi-media-step-forward" @onclick="NextTrack"></span>
-                <span class="visually-hidden">Random</span>
-            </button>
-            <button type="button" class="btn btn-link @(loop ? "text-primary" : "text-light")" @onclick="@(() => loop = !loop)">
-                <span class="oi oi-loop-square"></span>
-                <span class="visually-hidden">Loop</span>
-            </button>
-        </div>
-        <audio id="player" controls="controls" autoplay="autoplay" class="w-100" loop="@(driveItems?.Count == 1 && loop)" onended="@(loop ? "DotNet.invokeMethod('GrooveDrive', 'NextTrackInvokable')" : "")"></audio>
-    </div>
-</div>
+else
+{
+    <SongsContainer>
+        @foreach (var item in _playerState.AllMusic)
+        {
+            <SongListItem Title="@GetTitle(item)" Text="@($"{item.Audio?.Album}\n{item.Audio?.Artist}")" DriveItem="item" ClickHandler="@(() => _playerState.Play(item))" />
+        }
+    </SongsContainer>
+}
 
 @code {
-    private List<DriveItem>? driveItems => _state.DriveItems?.ToList();
-    private bool isLoading => _state.DriveItems?.Count() <= 0;
-    private string? streamSource;
-    private string? streamMediaType;
-    private string pageTitle => $"Groove Drive{(isLoading ? " Loading..." : "")}";
-    private PlayerState playerState = PlayerState.Stop;
-    private DriveItem? currentSong;
-    private static Action? _updateAction;
-    private static Action? _nextTrackAction;
-    private static Task? _updateTask;
-    private static Task? _nextTrackTask;
-    private bool loop = true;
-    private bool random = true;
-    private string? searchQuery { get; set; }
-
+    private bool isLoading => _playerState.IsLoading;
+    private string pageTitle => $"Groove Drive{(isLoading ? " is loading..." : "")}";
     private string GetTitle(DriveItem item) => item is null ? "" : item.Audio is null ? item.Name : item.Audio.Title;
-
-    private async Task PreviousTrack()
+    
+    protected override void OnInitialized()
     {
-        if (driveItems is not null && currentSong is not null)
-        {
-            var indexOf = driveItems.IndexOf(currentSong);
-            var previousSong = driveItems[indexOf == driveItems.Count - 1 ? 0 : indexOf + 1];
-            await StreamItem(previousSong);
-        }
-    }
-
-    private async Task NextTrack()
-    {
-        if (driveItems is not null && currentSong is not null)
-        {
-            var indexOf = driveItems.IndexOf(currentSong);
-            var nextSong = driveItems[indexOf == 0 ? driveItems.Count - 1 : indexOf - 1];
-            await StreamItem(nextSong);
-        }
-    }
-
-    private async Task Play()
-    {
-        playerState = PlayerState.Play;
-        await _js.InvokeVoidAsync("GrooveDrive.play");
-    }
-
-    private async Task Pause()
-    {
-        playerState = PlayerState.Pause;
-        await _js.InvokeVoidAsync("GrooveDrive.pause");
-    }
-
-    private static List<DriveItem> GetFilteredItemList(IEnumerable<DriveItem> items)
-    {
-        return items.ToList().Where(i => i.File is not null && i.File.MimeType.StartsWith("audio")).ToList();
-    }
-
-    private async Task StreamItem(DriveItem item)
-    {
-        currentSong = item;
-        var fileStream = await _graphClient.Me.Drive.Items[item.Id].Content
-            .Request()
-            .GetAsync();
-        var fileName = item.Name;
-        using var streamRef = new DotNetStreamReference(stream: fileStream);
-        playerState = PlayerState.Play;
-        await _js.InvokeVoidAsync("GrooveDrive.streamItem", fileName, streamRef);
-        StateHasChanged();
-    }
-
-    [JSInvokable]
-    public static void CheckScrollPosition(int scrollTop, int scrollHeight)
-    {
-        if (scrollTop >= (scrollHeight - 1500))
-        {
-            _updateAction?.Invoke();
-        }
-    }
-
-    [JSInvokable]
-    public static void NextTrackInvokable()
-    {
-        _nextTrackAction?.Invoke();
-    }
-
-    protected override async Task OnInitializedAsync() => await _state.LoadDataAsync();
-
-    private void HandleNextTrack()
-    {
-        if (_nextTrackTask is null || _nextTrackTask is not null && _nextTrackTask.IsCompleted)
-        {
-            _nextTrackTask = InvokeAsync(NextTrack);
-        }
-    }
-
-    private async Task ClearSearchQuery ()
-    {
-        searchQuery = null;
-        await OnInitializedAsync();
+        _playerState.OnChange += StateHasChanged;
     }
 }

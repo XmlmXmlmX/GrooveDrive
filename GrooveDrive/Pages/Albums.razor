@@ -1,0 +1,24 @@
+﻿@page "/albums"
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Graph
+
+@attribute [Authorize]
+@inject PlayerState _playerState
+
+<PageTitle>Albums</PageTitle>
+
+@if (_playerState.IsLoading)
+{
+    <Spinner />
+}
+else
+{
+    <SongsContainer>
+        @foreach (var item in _playerState.AllMusic.Where(i => i.Audio is not null && !string.IsNullOrWhiteSpace(i.Audio.Album)).GroupBy(i => i.Audio.Album, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase))
+        {
+            <SongListItem Title="@item.Key" DriveItem="item.Value" Href="@($"/albums/{item.Key}")" />
+        }
+    </SongsContainer>
+}

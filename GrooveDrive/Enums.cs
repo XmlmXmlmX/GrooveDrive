@@ -1,6 +1,6 @@
 ﻿namespace GrooveDrive.Enums;
 
-public enum PlayerState
+public enum PlayerStateType
 {
     Unset, Stop, Play, Pause
 }

@@ -1,0 +1,46 @@
+﻿@using Microsoft.Graph
+
+<div class="col">
+    <div class="card h-100 text-white bg-dark">
+        <NavLink href="@Href" @onclick="OnClick" >
+            <AlbumThumbnail Item="DriveItem" CssClass="card-img-top" />
+        </NavLink>
+        <div class="card-body">
+            @if (!string.IsNullOrWhiteSpace(Title))
+            {
+                <h5 class="card-title">@Title</h5>
+            }
+            @if (!string.IsNullOrWhiteSpace(Text))
+            {
+                <p class="card-text">
+                    @Text
+            </p>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public DriveItem DriveItem { get; set; }
+
+    [Parameter]
+    public string? Title { get; set; }
+    
+    [Parameter]
+    public string? Text { get; set; }
+
+    [Parameter]
+    public string? Href { get; set; }
+
+    [Parameter]
+    public Action? ClickHandler { get; set; }
+
+    private async Task OnClick ()
+    {
+        if (ClickHandler is not null)
+        {
+            await InvokeAsync(ClickHandler);
+        }
+    }
+}
