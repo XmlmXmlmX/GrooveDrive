@@ -1,3 +1,32 @@
 ﻿::deep .current-song-thumbnail {
-    height: 12rem;
+    height: 15.625rem;
+    width: 15.625rem;
+    position: relative;
+}
+
+    ::deep .current-song-thumbnail:hover::after {
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: 50%;
+        transition: all .15s ease-in-out;
+        content: '';
+        cursor: pointer;
+        display: block;
+        background-image: url('https://cdn.jsdelivr.net/npm/open-iconic@1.1.1/svg/fullscreen-enter.svg');
+        background-color: rgba(0, 0, 0, .125);
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        filter: invert(100%);
+        -webkit-filter: invert(100%);
+        opacity: .5;
+    }
+
+.player-menu > button {
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out,transform .15s ease-in-out;
+}
+.player-menu > button:hover {
+    transform: scale(1.5);
 }

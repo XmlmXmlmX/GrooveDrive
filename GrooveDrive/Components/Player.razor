@@ -13,14 +13,20 @@
         <AlbumThumbnail Item="_playerState.CurrentSong" CssClass="current-song-thumbnail me-3" />
         <div class="d-flex flex-column">
             <span class="fs-5">@GetTitle(_playerState.CurrentSong)</span>
-            @if (_playerState.CurrentSong.Audio is not null)
+            @if (!string.IsNullOrWhiteSpace(_playerState.CurrentSong?.Audio?.Artist))
             {
-                <strong class="fs-6">@_playerState.CurrentSong.Audio?.Artist</strong>
+                <NavLink href="@($"/Artist/{_playerState.CurrentSong.Audio.Artist}")">
+                    <strong class="fs-6">@_playerState.CurrentSong.Audio.Artist</strong>
+                </NavLink>
             }
         </div>
     }
+    else
+    {
+        <div class="current-song-thumbnail"></div>
+    }
     <div class="d-flex flex-column flex-grow-1">
-        <div class="d-flex justify-content-center p-3">
+        <div class="d-flex justify-content-center p-3 player-menu">
             <button type="button" class="btn btn-link @(_playerState.Random ? "text-primary" : "text-light")" @onclick="@(() => _playerState.ToggleRandom())">
                 <span class="oi oi-random"></span>
                 <span class="visually-hidden">Random</span>
@@ -31,7 +37,7 @@
             </button>
             @if (_playerState.IsLoading)
             {
-                <Spinner />
+                <Spinner ExpandedAndCentered="false"/>
             }
             else {
                 switch (_playerState.CurrentPlayState)
@@ -46,7 +52,7 @@
                     case PlayerStateType.Stop:
                     case PlayerStateType.Unset:
                         <button type="button" class="btn btn-link" @onclick="Play">
-                            <span role="button" title="Play" class="oi oi-play-circle"></span>
+                            <span role="button" title="Play" class="oi oi-media-play"></span>
                             <span class="visually-hidden">Play</span>
                         </button>
                         break;
