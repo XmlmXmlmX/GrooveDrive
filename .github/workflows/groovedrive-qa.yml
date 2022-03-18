@@ -2,11 +2,12 @@ name: Build and deploy .NET Core app to Windows WebApp groovedrive
 on:
   push:
     branches:
-    - master
+    - develop
 env:
   AZURE_WEBAPP_NAME: groovedrive
+  AZURE_WEBAPP_SLOT_NAME: qa
   AZURE_WEBAPP_PACKAGE_PATH: GrooveDrive/publish
-  AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.groovedrive_1431 }}
+  AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.groovedrive_qa_3642 }}
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 6.0.x
   WORKING_DIRECTORY: GrooveDrive
@@ -33,6 +34,7 @@ jobs:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
         publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        slot-name: ${{ env.AZURE_WEBAPP_SLOT_NAME }}
     - name: Publish Artifacts
       uses: actions/upload-artifact@v1.0.0
       with:

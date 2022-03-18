@@ -14,9 +14,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{E86DD9CD-F358-4581-BCDC-91138A0F8098}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{4E3A338F-0E1C-4F33-A355-FD45578C3EBF}"
-	ProjectSection(SolutionItems) = preProject
-		.github\workflows\GrooveDrive.yml = .github\workflows\GrooveDrive.yml
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
