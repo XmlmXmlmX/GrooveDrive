@@ -1,0 +1,6 @@
+﻿.album-thumbnail {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    transition: background-image .15s ease-in-out;
+}

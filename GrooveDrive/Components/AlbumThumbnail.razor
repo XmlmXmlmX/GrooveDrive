@@ -2,13 +2,13 @@
 
 @if (!string.IsNullOrWhiteSpace(url))
 {
-    <img src="@url" class="ratio ratio-1x1 @CssClass" @attributes="AdditionalAttributes">
+    <div role="img" style="background-image: url('@url');" class="album-thumbnail ratio ratio-1x1 @CssClass" @attributes="AdditionalAttributes"></div>
 }
 else
 {
-    <span class="ratio ratio-1x1 @CssClass" @attributes="AdditionalAttributes">
+    <div class="album-thumbnail ratio ratio-1x1 @CssClass" @attributes="AdditionalAttributes">
         <span class="oi oi-musical-note fs-6" aria-hidden="true"></span>
-    </span>
+    </div>
 }
 
 @code {
@@ -22,9 +22,4 @@ else
     public IDictionary<string, object>? AdditionalAttributes { get; set; }
 
     private string? url => Item?.Thumbnails?.CurrentPage?.Count > 0 ? Item.Thumbnails.CurrentPage[0].Large?.Url : null;
-
-    /*private static string? GetImageUrl(DriveItem item)
-    {
-        if (item?.Thumbnails?.CurrentPage is not null && Item.Thumbnails.CurrentPage.Count > 0)
-    }*/
 }

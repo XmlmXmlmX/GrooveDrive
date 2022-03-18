@@ -1,6 +1,6 @@
 ﻿@if (Show)
 {
-    <div class="w-100 h-100 d-flex justify-content-center align-items-center">
+    <div class="@CssClasses">
         <div class="spinner-grow text-primary" role="status">
             <span class="oi oi-musical-note text-light position-absolute top-50 start-50 translate-middle" aria-hidden="true"></span>
             <span class="visually-hidden">Loading...</span>
@@ -11,4 +11,12 @@
 @code {
     [Parameter]
     public bool Show { get; set; } = true;
+
+    [Parameter]
+    public bool ExpandedAndCentered { get; set; } = true;
+    
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    private string? CssClasses => ExpandedAndCentered ? $"w-100 h-100 d-flex justify-content-center align-items-center {CssClass}" : CssClass;
 }

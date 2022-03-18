@@ -9,8 +9,8 @@ public class PlayerState
     private readonly OneDriveMusicCrawlerService _crawlerService;
     public DriveItem? currentSong;
 
-    public event Action OnChange;
-    public event Func<Task> OnStreamChange;
+    public event Action? OnChange;
+    public event Func<Task>? OnStreamChange;
 
     public PlayerState(OneDriveMusicCrawlerService crawlerService)
     {
@@ -18,6 +18,14 @@ public class PlayerState
     }
 
     public List<DriveItem> AllMusic;
+
+    public Dictionary<string, DriveItem>? Artists => AllMusic?.Where(i => i.Audio?.Artist is not null).DistinctBy(i => i.Audio.Artist, StringComparer.OrdinalIgnoreCase).ToDictionary(i => i.Audio.Artist);
+
+    public Dictionary<string, DriveItem>? Albums => AllMusic?.Where(i => i.Audio?.Album is not null).DistinctBy(i => i.Audio.Album, StringComparer.OrdinalIgnoreCase).ToDictionary(i => i.Audio.Album);
+
+    public List<DriveItem>? SongsByArtistName(string artistName) => AllMusic?.Where(i => i.Audio?.Artist == artistName || i.Audio?.AlbumArtist == artistName).ToList();
+
+    public List<DriveItem>? SongsByAlbumName(string albumName) => AllMusic?.Where(i => i.Audio?.Album == albumName).ToList();
 
     public PlayerStateType CurrentPlayState { get; private set; } = PlayerStateType.Stop;
 

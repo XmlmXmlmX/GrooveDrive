@@ -1,4 +1,4 @@
-﻿@page "/Album/{name}"
+﻿@page "/Artist/{name}"
 
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.Graph
@@ -6,7 +6,7 @@
 @attribute [Authorize]
 @inject PlayerState _playerState
 
-<PageTitle>Album - @Name</PageTitle>
+<PageTitle>Artist - @Name</PageTitle>
 
 @if (_playerState.IsLoading)
 {
@@ -14,10 +14,10 @@
 }
 else
 {
-    if (!string.IsNullOrWhiteSpace(Name) && _playerState.SongsByAlbumName(Name) is not null)
+    if (!string.IsNullOrWhiteSpace(Name) && _playerState.SongsByArtistName(Name) is not null)
     {
         <SongsContainer>
-            @foreach (var item in _playerState.SongsByAlbumName(Name))
+            @foreach (var item in _playerState.SongsByArtistName(Name))
             {
                 <SongListItem Title="@GetTitle(item)" Text="@($"{item.Audio?.Album}\n{item.Audio?.Artist}")" DriveItem="item" ClickHandler="@(() => _playerState.Play(item))" />
             }
