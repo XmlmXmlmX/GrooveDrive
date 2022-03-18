@@ -7,10 +7,10 @@
 @inject PlayerState _playerState
 @inject IJSRuntime _js
 
-<div class="fixed-bottom py-3 d-flex align-items-center justify-content-between">
+<div class="fixed-bottom d-flex align-items-center justify-content-between">
     @if (_playerState.CurrentSong is not null)
     {
-        <AlbumThumbnail Item="_playerState.CurrentSong" CssClass="current-song-thumbnail me-3" style="width: 8rem; height: 8rem;" />
+        <AlbumThumbnail Item="_playerState.CurrentSong" CssClass="current-song-thumbnail me-3" />
         <div class="d-flex flex-column">
             <span class="fs-5">@GetTitle(_playerState.CurrentSong)</span>
             @if (_playerState.CurrentSong.Audio is not null)

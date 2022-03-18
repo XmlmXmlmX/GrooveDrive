@@ -5,6 +5,19 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrooveDrive", "GrooveDrive\GrooveDrive.csproj", "{981AE0A3-41B6-4BD8-A637-BB51D6C9D043}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{34BECE7C-73BF-4801-A2C8-841082EC2110}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{E86DD9CD-F358-4581-BCDC-91138A0F8098}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{4E3A338F-0E1C-4F33-A355-FD45578C3EBF}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\GrooveDrive.yml = .github\workflows\GrooveDrive.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,6 +31,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E86DD9CD-F358-4581-BCDC-91138A0F8098} = {34BECE7C-73BF-4801-A2C8-841082EC2110}
+		{4E3A338F-0E1C-4F33-A355-FD45578C3EBF} = {E86DD9CD-F358-4581-BCDC-91138A0F8098}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {65CABD0F-A330-4682-BD86-4F913E635D16}

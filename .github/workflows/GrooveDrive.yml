@@ -1,12 +1,12 @@
-name: Build and deploy .NET Core app to Windows WebApp GrooveDrive20220204082128
+name: Build and deploy .NET Core app to Windows WebApp GrooveDrive
 on:
   push:
     branches:
     - master
 env:
-  AZURE_WEBAPP_NAME: GrooveDrive20220204082128
+  AZURE_WEBAPP_NAME: GrooveDrive
   AZURE_WEBAPP_PACKAGE_PATH: GrooveDrive/publish
-  AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.GrooveDrive20220204082128_5182 }}
+  AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.GrooveDrive_5182 }}
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 6.0.x
   WORKING_DIRECTORY: GrooveDrive
