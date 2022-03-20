@@ -70,7 +70,7 @@
         <div class="progress" style="height: 1px;">
             <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
-        <audio id="player" controls="controls" autoplay="autoplay" class="w-100 d-none" loop="@(_playerState.AllMusic?.Count() == 1 && _playerState.Repeat)" onended="@(_playerState.Repeat ? "DotNet.invokeMethod('GrooveDrive', 'NextTrackInvokable')" : "")" ontimeupdate="GrooveDrive.updateProgress(this)"></audio>
+        <video id="player" controls="controls" autoplay="autoplay" class="w-100" loop="@(_playerState.AllMusic?.Count() == 1 && _playerState.Repeat)" onended="@(_playerState.Repeat ? "DotNet.invokeMethod('GrooveDrive', 'NextTrackInvokable')" : "")" ontimeupdate="GrooveDrive.updateProgress(this)"></video>
     </div>
 </div>
 
