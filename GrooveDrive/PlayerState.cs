@@ -1,43 +1,36 @@
-﻿using GrooveDrive.Services;
-using GrooveDrive.Enums;
-using Microsoft.Graph;
+﻿using GrooveDrive.Enums;
 
 namespace GrooveDrive;
 
 public class PlayerState
 {
-    private readonly OneDriveMusicCrawlerService _crawlerService;
-    public DriveItem? currentSong;
+    public Song? currentSong;
 
     public event Action? OnChange;
+    public event Func<Task>? OnSongsStateChanged;
     public event Func<Task>? OnStreamChange;
 
-    public PlayerState(OneDriveMusicCrawlerService crawlerService)
-    {
-        _crawlerService = crawlerService;
-    }
+    public List<Song>? AllSongs = null;
 
-    public List<DriveItem> AllMusic;
+    public Dictionary<string, Song>? Artists => AllSongs?.Where(i => i.Artist is not null).DistinctBy(i => i.Artist, StringComparer.OrdinalIgnoreCase).ToDictionary(i => i.Artist);
 
-    public Dictionary<string, DriveItem>? Artists => AllMusic?.Where(i => i.Audio?.Artist is not null).DistinctBy(i => i.Audio.Artist, StringComparer.OrdinalIgnoreCase).ToDictionary(i => i.Audio.Artist);
+    public Dictionary<string, Song>? Albums => AllSongs?.Where(i => i.Album is not null).DistinctBy(i => i.Album, StringComparer.OrdinalIgnoreCase).ToDictionary(i => i.Album);
 
-    public Dictionary<string, DriveItem>? Albums => AllMusic?.Where(i => i.Audio?.Album is not null).DistinctBy(i => i.Audio.Album, StringComparer.OrdinalIgnoreCase).ToDictionary(i => i.Audio.Album);
+    public List<Song>? SongsByArtistName(string artistName) => AllSongs?.Where(i => i.Artist == artistName || i.AlbumArtist == artistName).ToList();
 
-    public List<DriveItem>? SongsByArtistName(string artistName) => AllMusic?.Where(i => i.Audio?.Artist == artistName || i.Audio?.AlbumArtist == artistName).ToList();
-
-    public List<DriveItem>? SongsByAlbumName(string albumName) => AllMusic?.Where(i => i.Audio?.Album == albumName).ToList();
+    public List<Song>? SongsByAlbumName(string albumName) => AllSongs?.Where(i => i.Album == albumName).ToList();
 
     public PlayerStateType CurrentPlayState { get; private set; } = PlayerStateType.Stop;
 
     public bool Repeat { get; private set; } = true;
 
-    public bool IsLoading => AllMusic is null;
+    public bool IsLoading => AllSongs is null;
 
     public bool Random { get; private set; } = true;
 
     public string? SearchQuery { get; set; }
 
-    public DriveItem? CurrentSong
+    public Song? CurrentSong
     {
         get
         {
@@ -61,19 +54,31 @@ public class PlayerState
         NotifyStateChanged();
     }
 
-    public async Task LoadDataAsync()
+    public void SetSongs(IEnumerable<Song> songs)
     {
-        var items = await _crawlerService.CrawlAsync();
-        AllMusic = items.OrderBy(i => i.Audio?.Artist).ToList();
+        AllSongs = songs.ToList();
         NotifyStateChanged();
+        NotifySongsStateChanged();
+    }
+
+    public void AddSongs(IEnumerable<Song> songs)
+    {
+        if (AllSongs is null)
+        {
+            AllSongs = new();
+        }
+
+        AllSongs.AddRange(songs);
+        NotifyStateChanged();
+        NotifySongsStateChanged();
     }
 
     public void PreviousTrack()
     {
-        if (AllMusic is not null && AllMusic.Count > 0 && CurrentSong is not null)
+        if (AllSongs is not null && AllSongs.Count > 0 && CurrentSong is not null)
         {
-            var indexOf = AllMusic.IndexOf(CurrentSong);
-            CurrentSong = AllMusic[indexOf == AllMusic.Count - 1 ? 0 : indexOf + 1];
+            var indexOf = AllSongs.IndexOf(CurrentSong);
+            CurrentSong = AllSongs[indexOf == AllSongs.Count - 1 ? 0 : indexOf + 1];
             NotifyStreamHasChanged();
             NotifyStateChanged();
         }
@@ -81,7 +86,7 @@ public class PlayerState
 
     public void NextTrack()
     {
-        if (AllMusic is not null && AllMusic.Count > 0)
+        if (AllSongs is not null && AllSongs.Count > 0)
         {
             if (Random || CurrentSong is null)
             {
@@ -89,8 +94,8 @@ public class PlayerState
             }
             else
             {
-                var indexOf = AllMusic.IndexOf(CurrentSong);
-                CurrentSong = AllMusic[indexOf == 0 ? AllMusic.Count - 1 : indexOf - 1];
+                var indexOf = AllSongs.IndexOf(CurrentSong);
+                CurrentSong = AllSongs[indexOf == 0 ? AllSongs.Count - 1 : indexOf - 1];
             }
 
             NotifyStreamHasChanged();
@@ -100,7 +105,7 @@ public class PlayerState
 
     public void Play()
     {
-        if (AllMusic is not null && AllMusic.Count > 0)
+        if (AllSongs is not null && AllSongs.Count > 0)
         {
             if (Equals(CurrentPlayState, PlayerStateType.Stop))
             {
@@ -115,11 +120,11 @@ public class PlayerState
         }
     }
 
-    public void Play(DriveItem driveItem)
+    public void Play(Song song)
     {
-        if (driveItem is not null && AllMusic.Contains(driveItem))
+        if (song is not null && AllSongs is not null && AllSongs.Contains(song))
         {
-            CurrentSong = driveItem;
+            CurrentSong = song;
             NotifyStreamHasChanged();
             CurrentPlayState = PlayerStateType.Play;
             NotifyStateChanged();
@@ -137,6 +142,11 @@ public class PlayerState
         OnChange?.Invoke();
     }
 
+    private void NotifySongsStateChanged()
+    {
+        OnSongsStateChanged?.Invoke();
+    }
+
     private void NotifyStreamHasChanged()
     {
         OnStreamChange?.Invoke();
@@ -144,9 +154,12 @@ public class PlayerState
 
     private void NextRandom()
     {
-        var random = new Random();
-        int songIndex = random.Next(0, AllMusic.Count);
+        if (AllSongs is not null)
+        {
+            var random = new Random();
+            int songIndex = random.Next(0, AllSongs.Count);
 
-        CurrentSong = AllMusic[songIndex];
+            CurrentSong = AllSongs[songIndex];
+        }
     }
 }

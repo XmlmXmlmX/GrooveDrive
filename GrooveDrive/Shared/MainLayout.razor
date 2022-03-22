@@ -1,5 +1,13 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Text.Json
+@using GrooveDrive.Services
+@using Microsoft.Graph
+
+@inherits LayoutComponentBase
+
 @inject PlayerState _playerState
+@inject IJSRuntime _js
+@inject OneDriveMusicCrawlerService _crawlerService
+@inject GraphServiceClient _graphClient
 
 <div class="page">
     <div class="sidebar">
@@ -14,6 +22,20 @@
 
         <article class="content px-4">
             @Body
+            @if (showDialog)
+            {
+                <Dialog IsOpen="showDialog" SubmitHandler="@(() => HandleStartSearchClick())" Title="Musik hinzufügen" SubmitButtonDisabled="crawling">
+                    <ChildContent>
+                        <p>Nach Musik auf deinem OneDrive suchen</p>
+                    </ChildContent>
+                    <SubmitButtonContent>
+                        Suche Starten <Spinner Show="crawling" />
+                    </SubmitButtonContent>
+                    <CloseButtonContent>
+                        Abbrechen
+                    </CloseButtonContent>
+                </Dialog>
+            }
         </article>
     </main>
 
@@ -21,3 +43,86 @@
         <Player />
     </AuthorizeView>
 </div>
+
+@code {
+    private static Action<IEnumerable<Song>>? _pushSongsFromIndexedDBAction;
+
+    private bool showDialog = false;
+    private bool crawling = false;
+    private const string INDEXEDDB_NAME = "GrooveDrive";
+    private const string INDEXEDDB_TABLE_ID = "Songs";
+    private const string INDEXEDDB_KEYPATH = "driveId";
+    private static IEnumerable<string> INDEXEDDB_INDEXES = new [] { "artist", "album", "albumArtist", "composers", "year", "title", "fileName" };
+    private const int INDEXEDDB_VERSION = 2;
+
+    [JSInvokable("ReceiveSongsFromIndexedDB")]
+    public static void ReceiveSongsFromIndexedDBInvokable(IEnumerable<Song> songs)
+    {
+        _pushSongsFromIndexedDBAction?.DynamicInvoke(songs);
+    }
+
+    private void PushSongsFromIndexedDB(IEnumerable<Song> songs)
+    {
+        _playerState.SetSongs(songs);
+        showDialog = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _pushSongsFromIndexedDBAction += PushSongsFromIndexedDB;
+        await _js.InvokeVoidAsync("GrooveDrive.indexedDB.init", INDEXEDDB_NAME, INDEXEDDB_TABLE_ID, INDEXEDDB_KEYPATH, INDEXEDDB_VERSION);
+        showDialog = true;
+    }
+
+    private async Task HandleStartSearchClick()
+    {
+        crawling = true;
+        showDialog = false;
+
+        var filesRequest = GetSearchRequest(_graphClient.Me.Drive.Root.ItemWithPath("Music"));
+
+        await GetDriveItemsAsync(filesRequest);
+        await IterateFolders(_graphClient.Me.Drive.Root.Children.Request());
+
+        crawling = false;
+    }
+
+    private static IDriveItemSearchRequest GetSearchRequest(IDriveItemRequestBuilder builder)
+    {
+        return builder.Search($"*.mp3").Request().Filter("audio ne null").Select("id,name,audio,file,thumbnails,webDavUrl").Expand("thumbnails").OrderBy("lastModifiedDateTime%20desc");
+    }
+
+    private async Task IterateFolders(IDriveItemChildrenCollectionRequest request)
+    {
+        List<Song> songs = new List<Song>();
+        var folders = await request.GetAsync();
+
+        foreach (var folder in folders)
+        {
+            var childItems = GetSearchRequest(_graphClient.Me.Drive.Items[folder.Id]);
+
+            await GetDriveItemsAsync(childItems);
+        }
+    }
+
+    private async Task GetDriveItemsAsync(IDriveItemSearchRequest request, bool innerLoop = false)
+    {
+        var driveItemsPage = await request.GetAsync();
+
+        var _songs = driveItemsPage.CurrentPage.Where(d => d.Audio is not null)
+                .Select(r => new Song(r.Audio, r.Id, r.Name, r.Thumbnails?.CurrentPage?.Count > 0 ? r.Thumbnails.CurrentPage[0].Large?.Url : null))
+                .ToList();
+        _playerState.AddSongs(_songs);
+        await _js.InvokeVoidAsync("GrooveDrive.indexedDB.add", INDEXEDDB_TABLE_ID, _songs);
+
+        while (driveItemsPage.NextPageRequest != null)
+        {
+            driveItemsPage = await driveItemsPage.NextPageRequest.GetAsync();
+            var _songsInner = driveItemsPage.CurrentPage.Where(d => d.Audio is not null)
+                .Select(r => new Song(r.Audio, r.Id, r.Name, r.Thumbnails?.CurrentPage?.Count > 0 ? r.Thumbnails.CurrentPage[0].Large?.Url : null))
+                .ToList();
+            _playerState.AddSongs(_songsInner);
+            await _js.InvokeVoidAsync("GrooveDrive.indexedDB.add", INDEXEDDB_TABLE_ID, _songsInner);
+        }
+    }
+}

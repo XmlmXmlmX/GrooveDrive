@@ -9,7 +9,7 @@
 <PageTitle>
     @if (_playerState.CurrentSong is not null)
     {
-        <text>@GetTitle(_playerState.CurrentSong) von @(_playerState.CurrentSong.Audio?.Artist)</text>
+        <text>@_playerState.CurrentSong.GetTitle() von @(_playerState.CurrentSong.Artist)</text>
     }
     else
     {
@@ -24,9 +24,9 @@
 else
 {
     <SongsContainer>
-        @foreach (var item in _playerState.AllMusic)
+        @foreach (var song in _playerState.AllSongs)
         {
-            <SongListItem Title="@GetTitle(item)" Text="@($"{item.Audio?.Album}\n{item.Audio?.Artist}")" DriveItem="item" ClickHandler="@(() => _playerState.Play(item))" />
+            <SongListItem Title="@song.GetTitle()" Text="@($"{song.Album}\n{song.Artist}")" ThumbnailUrl="@song.ThumbnailUrl" ClickHandler="@(() => _playerState.Play(song))" />
         }
     </SongsContainer>
 }
@@ -34,7 +34,6 @@ else
 @code {
     private bool isLoading => _playerState.IsLoading;
     private string pageTitle => $"Groove Drive{(isLoading ? " is loading..." : "")}";
-    private string GetTitle(DriveItem item) => item is null ? "" : item.Audio is null ? item.Name : item.Audio.Title;
     
     protected override void OnInitialized()
     {

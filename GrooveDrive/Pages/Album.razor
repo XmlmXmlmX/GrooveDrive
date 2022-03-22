@@ -17,9 +17,9 @@ else
     if (!string.IsNullOrWhiteSpace(Name) && _playerState.SongsByAlbumName(Name) is not null)
     {
         <SongsContainer>
-            @foreach (var item in _playerState.SongsByAlbumName(Name))
+            @foreach (var song in _playerState.SongsByAlbumName(Name))
             {
-                <SongListItem Title="@GetTitle(item)" Text="@($"{item.Audio?.Album}\n{item.Audio?.Artist}")" DriveItem="item" ClickHandler="@(() => _playerState.Play(item))" />
+                <SongListItem Title="@song.GetTitle()" ThumbnailUrl="@song.ThumbnailUrl" Text="@($"{song.Album}\n{song.Artist}")" ClickHandler="@(() => _playerState.Play(song))" />
             }
         </SongsContainer>
     }
@@ -28,6 +28,4 @@ else
 @code {
     [Parameter]
     public string? Name { get; set; }
-
-    private string GetTitle(DriveItem item) => item is null ? "" : item.Audio is null ? item.Name : item.Audio.Title;
 }

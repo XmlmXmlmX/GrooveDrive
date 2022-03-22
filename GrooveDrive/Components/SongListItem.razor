@@ -3,7 +3,7 @@
 <div class="col">
     <div class="card h-100 text-white bg-dark">
         <NavLink href="@Href" @onclick="OnClick" >
-            <AlbumThumbnail Item="DriveItem" CssClass="card-img-top song-list-item-thumbnail" />
+            <AlbumThumbnail ThumbnailUrl="@ThumbnailUrl" CssClass="card-img-top song-list-item-thumbnail" />
         </NavLink>
         <div class="card-body">
             @if (!string.IsNullOrWhiteSpace(Title))
@@ -21,8 +21,8 @@
 </div>
 
 @code {
-    [Parameter, EditorRequired]
-    public DriveItem DriveItem { get; set; }
+    [Parameter]
+    public string? ThumbnailUrl { get; set; }
 
     [Parameter]
     public string? Title { get; set; }
