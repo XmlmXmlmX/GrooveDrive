@@ -1,8 +1,8 @@
-﻿::deep .song-list-item-thumbnail::after {
+﻿.col.card::after {
     position: relative;
 }
 
-::deep .song-list-item-thumbnail:hover::after {
+.col.card:hover::after {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: 50%;
@@ -20,4 +20,8 @@
     filter: invert(50%);
     -webkit-filter: invert(100%);
     opacity: .5;
+}
+
+.col.card.is-folder {
+    background-image: url('https://cdn.jsdelivr.net/npm/open-iconic@1.1.1/svg/plus.svg');
 }

@@ -2,16 +2,15 @@
 @using Microsoft.Graph
 @using System.Text.Json
 @attribute [Authorize]
-
 @inject GraphServiceClient _graphClient
 @inject PlayerState _playerState
 @inject IJSRuntime _js
 
-<div class="fixed-bottom d-flex align-items-center justify-content-between">
+<div class="player">
     @if (_playerState.CurrentSong is not null)
     {
-        <AlbumThumbnail Item="_playerState.CurrentSong" CssClass="current-song-thumbnail me-3" />
-        <div class="d-flex flex-column">
+        <AlbumThumbnail ThumbnailUrl="@_playerState.CurrentSong.ThumbnailUrl" CssClass="fixed-bottom" />
+        <div class="fixed-bottom bg-secondary d-flex flex-column p-2 current-song-info">
             <span class="fs-5">@_playerState.CurrentSong.GetTitle()</span>
             @if (!string.IsNullOrWhiteSpace(_playerState.CurrentSong.Artist))
             {
@@ -23,9 +22,9 @@
     }
     else
     {
-        <div class="current-song-thumbnail"></div>
+        <div class="album-thumbnail fixed-bottom"></div>
     }
-    <div class="d-flex flex-column flex-grow-1">
+    <div class="fixed-bottom d-flex flex-column flex-grow-1">
         <div class="d-flex justify-content-center p-3 player-menu">
             <button type="button" class="btn btn-link @(_playerState.Random ? "text-primary" : "text-light")" @onclick="@(() => _playerState.ToggleRandom())">
                 <span class="oi oi-random"></span>
@@ -66,9 +65,12 @@
                 <span class="oi oi-loop-square"></span>
                 <span class="visually-hidden">Loop</span>
             </button>
+            <span>@currentTimeFormat</span>
+            <span> of </span>
+            <span>@durationFormat</span>
         </div>
-        <div class="progress" style="height: 1px;">
-            <div class="progress-bar" role="progressbar" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100" style="width: @progress"></div>
+        <div class="progress" style="height: 3px;">
+            <div class="progress-bar" role="progressbar" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100" style="width: @(progress)%; transition: 2.5s linear;"></div>
         </div>
         <audio id="player" controls="controls" class="w-100 d-none" autoplay="autoplay" loop="@(_playerState.AllSongs?.Count() == 1 && _playerState.Repeat)" onended="@(_playerState.Repeat ? "DotNet.invokeMethod('GrooveDrive', 'NextTrackInvokable')" : "")" ontimeupdate="DotNet.invokeMethod('GrooveDrive', 'UpdateProgressInvokable', this.currentTime, this.duration)"></audio>
     </div>
@@ -77,8 +79,13 @@
 @code {
     private static Action? _nextTrackAction;
     private static Action<float, float>? _updateProgressAction;
-
-    private int progress = 0;
+    private float _currentTime = 0;
+    private float _duration = 0;
+    private TimeSpan t1 => TimeSpan.FromSeconds(_duration);
+    private TimeSpan t2 => TimeSpan.FromSeconds(_currentTime);
+    private string durationFormat => string.Format("{1:D2}:{2:D2}", t1.Hours, t1.Minutes, t1.Seconds, t1.Milliseconds);
+    private string currentTimeFormat => string.Format("{1:D2}:{2:D2}", t2.Hours, t2.Minutes, t2.Seconds, t2.Milliseconds);
+    private int progress => (int)((Math.Round(_currentTime) * 100) / Math.Round(_duration));
 
     private async Task StreamCurrentSong()
     {
@@ -94,7 +101,9 @@
 
     private void UpdateProgress(float currentTime, float duration)
     {
-        progress = (int)((Math.Round(currentTime) * 100) / Math.Round(duration));
+        _currentTime = currentTime;
+        _duration = duration;
+        StateHasChanged();
     }
 
     private void Play()

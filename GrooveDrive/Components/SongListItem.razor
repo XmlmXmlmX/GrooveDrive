@@ -1,11 +1,10 @@
 ﻿@using Microsoft.Graph
 
+
 <div class="col">
-    <div class="card h-100 text-white bg-dark">
-        <NavLink href="@Href" @onclick="OnClick" >
-            <AlbumThumbnail ThumbnailUrl="@ThumbnailUrl" CssClass="card-img-top song-list-item-thumbnail" />
-        </NavLink>
-        <div class="card-body">
+    <NavLink href="@Href" @onclick="OnClick" class="@CssClasses">
+        <AlbumThumbnail ThumbnailUrl="@ThumbnailUrl" CssClass="card-img-top song-list-item-thumbnail" />
+        <div class="card-body position-absolute bottom-0 start-0">
             @if (!string.IsNullOrWhiteSpace(Title))
             {
                 <h5 class="card-title">@Title</h5>
@@ -17,7 +16,7 @@
                 </p>
             }
         </div>
-    </div>
+    </NavLink>
 </div>
 
 @code {
@@ -25,8 +24,11 @@
     public string? ThumbnailUrl { get; set; }
 
     [Parameter]
+    public bool? IsFolder { get; set; }
+
+    [Parameter]
     public string? Title { get; set; }
-    
+
     [Parameter]
     public string? Text { get; set; }
 
@@ -35,6 +37,10 @@
 
     [Parameter]
     public Action? ClickHandler { get; set; }
+
+    private const string CSS_CLASSES = "card text-white bg-dark position-relative";
+
+    private string? CssClasses => IsFolder is true ? $"is-folder {CSS_CLASSES}" : CSS_CLASSES;
 
     private async Task OnClick ()
     {

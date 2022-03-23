@@ -1,9 +1,7 @@
 ﻿@using System.Text.Json
 @using GrooveDrive.Services
 @using Microsoft.Graph
-
 @inherits LayoutComponentBase
-
 @inject PlayerState _playerState
 @inject IJSRuntime _js
 @inject OneDriveMusicCrawlerService _crawlerService
@@ -17,14 +15,14 @@
     <main>
         <div class="top-row px-4 auth">
             <LoginDisplay />
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            <button class="btn btn-outline-secondary" @onclick="HandleStartSearchClick">Update Library</button>
         </div>
 
         <article class="content px-4">
             @Body
             @if (showDialog)
             {
-                <Dialog IsOpen="showDialog" SubmitHandler="@(() => HandleStartSearchClick())" Title="Musik hinzufügen" SubmitButtonDisabled="crawling">
+                <Dialog IsOpen="showDialog" SubmitHandler="@(async () => await HandleStartSearchClick())" Title="Musik hinzufügen" SubmitButtonDisabled="crawling">
                     <ChildContent>
                         <p>Nach Musik auf deinem OneDrive suchen</p>
                     </ChildContent>
@@ -63,15 +61,19 @@
 
     private void PushSongsFromIndexedDB(IEnumerable<Song> songs)
     {
-        _playerState.SetSongs(songs);
+        _playerState.SetSongsFromIndexedDB(songs);
         showDialog = false;
     }
 
     protected override async Task OnInitializedAsync()
     {
         _pushSongsFromIndexedDBAction += PushSongsFromIndexedDB;
-        await _js.InvokeVoidAsync("GrooveDrive.indexedDB.init", INDEXEDDB_NAME, INDEXEDDB_TABLE_ID, INDEXEDDB_KEYPATH, INDEXEDDB_VERSION);
-        showDialog = true;
+
+        if (!_playerState.SongsLoadedFromIndexedDB || _playerState.AllSongs?.Count <= 0)
+        {
+            await _js.InvokeVoidAsync("GrooveDrive.indexedDB.init", INDEXEDDB_NAME, INDEXEDDB_TABLE_ID, INDEXEDDB_KEYPATH, INDEXEDDB_VERSION);
+            showDialog = true;
+        }
     }
 
     private async Task HandleStartSearchClick()

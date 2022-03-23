@@ -36,6 +36,9 @@ public class Song : Audio
     [JsonPropertyName("driveId")]
     public string DriveId { get; set; }
 
+    [JsonPropertyName("favorite")]
+    public string Favorite { get; set; }
+
     [JsonPropertyName("thumbnailUrl")]
     public string? ThumbnailUrl { get; set; }
 

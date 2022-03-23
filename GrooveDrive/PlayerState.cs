@@ -5,26 +5,34 @@ namespace GrooveDrive;
 public class PlayerState
 {
     public Song? currentSong;
+    public List<Song>? playList;
 
     public event Action? OnChange;
     public event Func<Task>? OnSongsStateChanged;
+    public event Func<Task>? OnPlaylistStateChanged;
     public event Func<Task>? OnStreamChange;
 
     public List<Song>? AllSongs = null;
 
-    public Dictionary<string, Song>? Artists => AllSongs?.Where(i => i.Artist is not null).DistinctBy(i => i.Artist, StringComparer.OrdinalIgnoreCase).ToDictionary(i => i.Artist);
+    public Dictionary<string, Song>? Artists => AllSongs?.Where(i => !string.IsNullOrWhiteSpace(i.Artist)).DistinctBy(i => i.Artist, StringComparer.OrdinalIgnoreCase).ToDictionary(i => i.Artist);
 
-    public Dictionary<string, Song>? Albums => AllSongs?.Where(i => i.Album is not null).DistinctBy(i => i.Album, StringComparer.OrdinalIgnoreCase).ToDictionary(i => i.Album);
+    public Dictionary<string, Song>? Albums => AllSongs?.Where(i => !string.IsNullOrWhiteSpace(i.Album)).DistinctBy(i => i.Album, StringComparer.OrdinalIgnoreCase).ToDictionary(i => i.Album);
+    
+    public Dictionary<string, Song>? Genres => AllSongs?.Where(i => !string.IsNullOrWhiteSpace(i.Genre)).DistinctBy(i => i.Genre, StringComparer.OrdinalIgnoreCase).ToDictionary(i => i.Genre);
 
-    public List<Song>? SongsByArtistName(string artistName) => AllSongs?.Where(i => i.Artist == artistName || i.AlbumArtist == artistName).ToList();
+    public List<Song>? SongsByArtistName(string artistName) => AllSongs?.Where(i => i.Artist == artistName || i.AlbumArtist == artistName).OrderBy(i => i.Artist).ToList();
 
-    public List<Song>? SongsByAlbumName(string albumName) => AllSongs?.Where(i => i.Album == albumName).ToList();
+    public List<Song>? SongsByAlbumName(string albumName) => AllSongs?.Where(i => i.Album == albumName).OrderBy(i => i.Album).ToList();
+
+    public List<Song>? SongsByGenreName(string genre) => AllSongs?.Where(i => i.Genre == genre).OrderBy(i => i.Genre).ToList();
 
     public PlayerStateType CurrentPlayState { get; private set; } = PlayerStateType.Stop;
 
     public bool Repeat { get; private set; } = true;
 
     public bool IsLoading => AllSongs is null;
+
+    public bool SongsLoadedFromIndexedDB { get; private set; }
 
     public bool Random { get; private set; } = true;
 
@@ -54,11 +62,19 @@ public class PlayerState
         NotifyStateChanged();
     }
 
-    public void SetSongs(IEnumerable<Song> songs)
+    public void SetSongsFromIndexedDB(IEnumerable<Song> songs)
     {
+        SongsLoadedFromIndexedDB = true;
         AllSongs = songs.ToList();
         NotifyStateChanged();
         NotifySongsStateChanged();
+    }
+
+    public void SetPlaylist(IEnumerable<Song> songs)
+    {
+        playList = songs.ToList();
+        NotifyStateChanged();
+        NotifyPlaylistStateChanged();
     }
 
     public void AddSongs(IEnumerable<Song> songs)
@@ -103,21 +119,15 @@ public class PlayerState
         }
     }
 
-    public void Play()
+    public void Play(List<Song>? songList = null)
     {
-        if (AllSongs is not null && AllSongs.Count > 0)
+        if (Random)
         {
-            if (Equals(CurrentPlayState, PlayerStateType.Stop))
-            {
-                if (Random)
-                {
-                    NextRandom();
-                }
-            }
-
-            CurrentPlayState = PlayerStateType.Play;
-            NotifyStateChanged();
+            NextRandom(songList);
         }
+
+        CurrentPlayState = PlayerStateType.Play;
+        NotifyStateChanged();
     }
 
     public void Play(Song song)
@@ -146,20 +156,30 @@ public class PlayerState
     {
         OnSongsStateChanged?.Invoke();
     }
+    
+    private void NotifyPlaylistStateChanged()
+    {
+        OnPlaylistStateChanged?.Invoke();
+    }
 
     private void NotifyStreamHasChanged()
     {
         OnStreamChange?.Invoke();
     }
 
-    private void NextRandom()
+    private void NextRandom(List<Song>? songList = null)
     {
-        if (AllSongs is not null)
+        if (songList is null)
+        {
+            songList = AllSongs;
+        }
+
+        if (songList is not null)
         {
             var random = new Random();
-            int songIndex = random.Next(0, AllSongs.Count);
+            int songIndex = random.Next(0, songList.Count);
 
-            CurrentSong = AllSongs[songIndex];
+            CurrentSong = songList[songIndex];
         }
     }
 }
