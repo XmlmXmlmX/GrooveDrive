@@ -1,0 +1,223 @@
+/* /Components/AlbumThumbnail.razor.rz.scp.css */
+.album-thumbnail[b-ysi2ozmgm5] {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    transition: background-image .15s ease-in-out;
+}
+/* /Components/Player.razor.rz.scp.css */
+[b-i6gisyihnb] .current-song-thumbnail {
+    height: 15.625rem;
+    width: 15.625rem;
+    position: relative;
+}
+
+    [b-i6gisyihnb] .current-song-thumbnail:hover::after {
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: 50%;
+        transition: all .15s ease-in-out;
+        content: '';
+        cursor: pointer;
+        display: block;
+        background-image: url('https://cdn.jsdelivr.net/npm/open-iconic@1.1.1/svg/fullscreen-enter.svg');
+        background-color: rgba(0, 0, 0, .125);
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        filter: invert(100%);
+        -webkit-filter: invert(100%);
+        opacity: .5;
+    }
+
+.player-menu > button[b-i6gisyihnb] {
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out,transform .15s ease-in-out;
+}
+.player-menu > button:hover[b-i6gisyihnb] {
+    transform: scale(1.5);
+}
+/* /Components/SongListItem.razor.rz.scp.css */
+[b-wye6ph6qlq] .song-list-item-thumbnail::after {
+    position: relative;
+}
+
+[b-wye6ph6qlq] .song-list-item-thumbnail:hover::after {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 50%;
+    transition: all .15s ease-in-out;
+    content: '';
+    cursor: pointer;
+    display: block;
+    background-image: url('https://cdn.jsdelivr.net/npm/open-iconic@1.1.1/svg/play-circle.svg');
+    background-color: rgba(0, 0, 0, .125);
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    filter: invert(50%);
+    -webkit-filter: invert(100%);
+    opacity: .5;
+}
+/* /Components/SongsContainer.razor.rz.scp.css */
+.songs-container[b-6nqnppmprg] {
+    height: calc(100vh - 12rem) !important;
+    overflow: hidden;
+    overflow-y: auto;
+}
+
+[b-6nqnppmprg] .current-song-thumbnail {
+    height: 5rem;
+    width: 5rem;
+}
+/* /Pages/Album.razor.rz.scp.css */
+/* /Pages/Albums.razor.rz.scp.css */
+/* /Pages/Artist.razor.rz.scp.css */
+/* /Pages/Index.razor.rz.scp.css */
+/* /Shared/MainLayout.razor.rz.scp.css */
+.page[b-a7947z7woa] {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+main[b-a7947z7woa] {
+    flex: 1;
+}
+
+.sidebar[b-a7947z7woa] {
+    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+}
+
+.top-row[b-a7947z7woa] {
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #d6d5d5;
+    justify-content: flex-end;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+}
+
+    .top-row[b-a7947z7woa]  a, .top-row[b-a7947z7woa]  .btn-link {
+        white-space: nowrap;
+        margin-left: 1.5rem;
+        text-decoration: none;
+    }
+
+    .top-row[b-a7947z7woa]  a:hover, .top-row[b-a7947z7woa]  .btn-link:hover {
+        text-decoration: underline;
+    }
+
+    .top-row[b-a7947z7woa]  a:first-child {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+@media (max-width: 640.98px) {
+    .top-row:not(.auth)[b-a7947z7woa] {
+        display: none;
+    }
+
+    .top-row.auth[b-a7947z7woa] {
+        justify-content: space-between;
+    }
+
+    .top-row[b-a7947z7woa]  a, .top-row[b-a7947z7woa]  .btn-link {
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 641px) {
+    .page[b-a7947z7woa] {
+        flex-direction: row;
+    }
+
+    .sidebar[b-a7947z7woa] {
+        width: 250px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+    }
+
+    .top-row[b-a7947z7woa] {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .top-row.auth[b-a7947z7woa]  a:first-child {
+        flex: 1;
+        text-align: right;
+        width: 0;
+    }
+
+    .top-row[b-a7947z7woa], article[b-a7947z7woa] {
+        padding-left: 2rem !important;
+        padding-right: 1.5rem !important;
+    }
+}
+/* /Shared/NavMenu.razor.rz.scp.css */
+.navbar-toggler[b-szuzr846gr] {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.top-row[b-szuzr846gr] {
+    height: 3.5rem;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.navbar-brand[b-szuzr846gr] {
+    font-size: 1.1rem;
+}
+
+.oi[b-szuzr846gr] {
+    width: 2rem;
+    font-size: 1.1rem;
+    vertical-align: text-top;
+}
+
+.nav-item[b-szuzr846gr] {
+    font-size: 0.9rem;
+    padding-bottom: 0.5rem;
+}
+
+    .nav-item:first-of-type[b-szuzr846gr] {
+        padding-top: 1rem;
+    }
+
+    .nav-item:last-of-type[b-szuzr846gr] {
+        padding-bottom: 1rem;
+    }
+
+    .nav-item[b-szuzr846gr]  a {
+        color: #d7d7d7;
+        border-radius: 4px;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        line-height: 3rem;
+    }
+
+.nav-item[b-szuzr846gr]  a.active {
+    background-color: rgba(255,255,255,0.25);
+    color: white;
+}
+
+.nav-item[b-szuzr846gr]  a:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+}
+
+@media (min-width: 641px) {
+    .navbar-toggler[b-szuzr846gr] {
+        display: none;
+    }
+
+    .collapse[b-szuzr846gr] {
+        /* Never collapse the sidebar for wide screens */
+        display: block;
+    }
+}
