@@ -165,7 +165,7 @@
       "url": "icon-wrapper.png"
     },
     {
-      "hash": "sha256-0zEP4nOXiKmI9pqmI6QKqXmbu7FtLZOx1yB5Tr4NzHU=",
+      "hash": "sha256-IhnGfGAVwDZ9UAGrsNVHVfl4ICHGCL1cQyDuN7GfRnc=",
       "url": "index.html"
     },
     {
@@ -653,5 +653,5 @@
       "url": "_content\/Microsoft.Authentication.WebAssembly.Msal\/AuthenticationService.js"
     }
   ],
-  "version": "VqioFqHK"
+  "version": "CRTl1tbl"
 };
