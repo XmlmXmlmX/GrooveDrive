@@ -11,59 +11,64 @@ public class OneDriveMusicCrawlerService
         _graphClient = graphClient;
     }
 
-    public async Task<IEnumerable<DriveItem>> CrawlAsync()
+    public async Task<IEnumerable<Song>> CrawlAsync(string startPath = "Music")
     {
-        var filesRequest = GetSearchRequest(_graphClient.Me.Drive.Root.ItemWithPath("Music"));
+        var filesRequest = GetSearchRequest(_graphClient.Me.Drive.Root.ItemWithPath(startPath));
 
-        List<DriveItem> driveItems = await GetDriveItemsAsync(filesRequest);
-
-        //var folderRequest = _graphClient.Me.Drive.Root.ItemWithPath("Music").Children.Request().Select("id,name,folder,thumbnails,webDavUrl").Expand("thumbnails").OrderBy("lastModifiedDateTime%20desc");
+        List<Song> songs = await GetDriveItemsAsync(filesRequest);
         var foldersRequest = _graphClient.Me.Drive.Root.Children.Request();
 
-        //var folders = await folderRequest.GetAsync();
+        songs.AddRange(await IterateFolders(foldersRequest));
 
-        driveItems.AddRange(await IterateFolders(foldersRequest));
+        foreach (var song in songs)
+        {
+            if (song.Artist is null)
+            {
+                song.Artist = "Unbekannter Interpret";
+            }
+        }
 
-        return driveItems;
+        return songs;
     }
 
     private static IDriveItemSearchRequest GetSearchRequest(IDriveItemRequestBuilder builder)
     {
-        return builder.Search($"*.mp3").Request().Select("id,name,audio,file,thumbnails,webDavUrl").Expand("thumbnails").OrderBy("lastModifiedDateTime%20desc");
+        return builder.Search($"*.mp3").Request().Filter("audio ne null").Select("id,name,audio,file,thumbnails,webDavUrl").Expand("thumbnails").OrderBy("lastModifiedDateTime%20desc");
     }
 
-    private async Task<IEnumerable<DriveItem>> IterateFolders(IDriveItemChildrenCollectionRequest request)
+    private async Task<IEnumerable<Song>> IterateFolders(IDriveItemChildrenCollectionRequest request)
     {
-        List<DriveItem> driveItems = new List<DriveItem>();
+        List<Song> songs = new List<Song>();
         var folders = await request.GetAsync();
 
         foreach (var folder in folders)
         {
             var childItems = GetSearchRequest(_graphClient.Me.Drive.Items[folder.Id]);
-            driveItems.AddRange(await GetDriveItemsAsync(childItems));
 
-            //driveItems.AddRange(await IterateFolders());
+            songs.AddRange(await GetDriveItemsAsync(childItems));
         }
 
-        return driveItems;
+        return songs;
     }
 
-    private async Task<List<DriveItem>> GetDriveItemsAsync(IDriveItemSearchRequest request)
+    private async Task<List<Song>> GetDriveItemsAsync(IDriveItemSearchRequest request)
     {
-        List<DriveItem> driveItems = new List<DriveItem>();
+        List<Song> songs = new List<Song>();
         
         var driveResult = await request.GetAsync();
 
         if (driveResult is not null)
         {
-            driveItems.AddRange(driveResult.Select(r => r));
+            songs
+                .AddRange(driveResult.Where(d => d.Audio is not null)
+                .Select(r => new Song(r.Audio, r.Id, r.Name, r.Thumbnails?.CurrentPage?.Count > 0 ? r.Thumbnails.CurrentPage[0].Large?.Url : null)));
 
             if (driveResult.NextPageRequest is not null)
             {
-                driveItems.AddRange(await GetDriveItemsAsync(driveResult.NextPageRequest));
+                songs.AddRange(await GetDriveItemsAsync(driveResult.NextPageRequest));
             }
         }
 
-        return driveItems;
+        return songs;
     }
 }

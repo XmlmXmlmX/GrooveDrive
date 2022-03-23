@@ -1,0 +1,79 @@
+﻿@if (IsOpen)
+{
+    <div class="modal d-flex" tabindex="-1" @attributes="AdditionalAttributes">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Title</h5>
+                    @if (ShowCloseCross)
+                    {
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="Close"></button>
+                    }
+                </div>
+                <div class="modal-body">
+                    @ChildContent
+                </div>
+                <div class="modal-footer">
+                    @if (ShowCloseButton)
+                    {
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="Close">@CloseButtonContent</button>
+                    }
+                    @if (SubmitHandler is not null)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="Submit" disabled="@SubmitButtonDisabled">@SubmitButtonContent</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; } = false;
+    
+    [Parameter]
+    public bool SubmitButtonDisabled { get; set; } = false;
+
+    [Parameter]
+    public Action? SubmitHandler { get; set; }
+
+    [Parameter]
+    public bool ShowCloseButton { get; set; } = true;
+
+    [Parameter]
+    public bool ShowCloseCross { get; set; } = true;
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public RenderFragment? CloseButtonContent { get; set; }
+    
+    [Parameter]
+    public RenderFragment? SubmitButtonContent { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    private string? CssClasses => IsOpen ? $"modal-dialog modal-dialog-centered {CssClass}" : CssClass;
+
+    private async Task Submit()
+    {
+        if (SubmitHandler is not null)
+        {
+            await InvokeAsync(SubmitHandler);
+        }
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+    }
+}

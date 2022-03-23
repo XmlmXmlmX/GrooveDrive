@@ -12,11 +12,11 @@
     {
         <AlbumThumbnail Item="_playerState.CurrentSong" CssClass="current-song-thumbnail me-3" />
         <div class="d-flex flex-column">
-            <span class="fs-5">@GetTitle(_playerState.CurrentSong)</span>
-            @if (!string.IsNullOrWhiteSpace(_playerState.CurrentSong?.Audio?.Artist))
+            <span class="fs-5">@_playerState.CurrentSong.GetTitle()</span>
+            @if (!string.IsNullOrWhiteSpace(_playerState.CurrentSong.Artist))
             {
-                <NavLink href="@($"/Artist/{_playerState.CurrentSong.Audio.Artist}")">
-                    <strong class="fs-6">@_playerState.CurrentSong.Audio.Artist</strong>
+                <NavLink href="@($"/Artist/{_playerState.CurrentSong.Artist}")">
+                    <strong class="fs-6">@_playerState.CurrentSong.Artist</strong>
                 </NavLink>
             }
         </div>
@@ -68,37 +68,45 @@
             </button>
         </div>
         <div class="progress" style="height: 1px;">
-            <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar" role="progressbar" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100" style="width: @progress"></div>
         </div>
-        <audio id="player" controls="controls" autoplay="autoplay" class="w-100 d-none" loop="@(_playerState.AllMusic?.Count() == 1 && _playerState.Repeat)" onended="@(_playerState.Repeat ? "DotNet.invokeMethod('GrooveDrive', 'NextTrackInvokable')" : "")" ontimeupdate="GrooveDrive.updateProgress(this)"></audio>
+        <audio id="player" controls="controls" class="w-100 d-none" autoplay="autoplay" loop="@(_playerState.AllSongs?.Count() == 1 && _playerState.Repeat)" onended="@(_playerState.Repeat ? "DotNet.invokeMethod('GrooveDrive', 'NextTrackInvokable')" : "")" ontimeupdate="DotNet.invokeMethod('GrooveDrive', 'UpdateProgressInvokable', this.currentTime, this.duration)"></audio>
     </div>
 </div>
 
 @code {
     private static Action? _nextTrackAction;
+    private static Action<float, float>? _updateProgressAction;
 
-    private string GetTitle(DriveItem item) => item is null ? "" : item.Audio is null ? item.Name : item.Audio.Title;
+    private int progress = 0;
 
     private async Task StreamCurrentSong()
     {
         if (_playerState.CurrentSong is not null)
         {
-            var fileStream = await _graphClient.Me.Drive.Items[_playerState.CurrentSong.Id].Content
+            var fileStream = await _graphClient.Me.Drive.Items[_playerState.CurrentSong.DriveId].Content
                 .Request()
                 .GetAsync();
             using var streamRef = new DotNetStreamReference(stream: fileStream);
-            await _js.InvokeVoidAsync("GrooveDrive.streamItem", _playerState.CurrentSong.Name, streamRef);
+            await _js.InvokeVoidAsync("GrooveDrive.streamItem", streamRef);
         }
+    }
+
+    private void UpdateProgress(float currentTime, float duration)
+    {
+        progress = (int)((Math.Round(currentTime) * 100) / Math.Round(duration));
     }
 
     private void Play()
     {
         _playerState.Play();
+        _js.InvokeVoidAsync("GrooveDrive.play");
     }
 
     private void Pause()
     {
         _playerState.Pause();
+        _js.InvokeVoidAsync("GrooveDrive.pause");
     }
 
     private void Next()
@@ -110,19 +118,24 @@
     {
         _playerState.PreviousTrack();
     }
-    
+
+    [JSInvokable]
+    public static void UpdateProgressInvokable(float currentTime, float duration)
+    {
+        _updateProgressAction?.DynamicInvoke(currentTime, duration);
+    }
+
     [JSInvokable]
     public static void NextTrackInvokable()
     {
         _nextTrackAction?.Invoke();
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        await _playerState.LoadDataAsync();
-        await StreamCurrentSong();
-
         _playerState.OnChange += StateHasChanged;
         _playerState.OnStreamChange += StreamCurrentSong;
+        _nextTrackAction += Next;
+        _updateProgressAction += UpdateProgress;
     }
 }

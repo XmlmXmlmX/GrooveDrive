@@ -17,7 +17,7 @@ else
     <SongsContainer>
         @foreach (var item in _playerState.Artists)
         {
-            <SongListItem Title="@item.Key" DriveItem="item.Value" Href="@($"/Artist/{item.Key}")" />
+            <SongListItem Title="@item.Key" ThumbnailUrl="@item.Value.ThumbnailUrl" Href="@($"/Artist/{item.Key}")" />
         }
     </SongsContainer>
 }

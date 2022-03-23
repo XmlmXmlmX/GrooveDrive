@@ -1,8 +1,8 @@
 ﻿@using Microsoft.Graph
 
-@if (!string.IsNullOrWhiteSpace(url))
+@if (!string.IsNullOrWhiteSpace(ThumbnailUrl))
 {
-    <div role="img" style="background-image: url('@url');" class="album-thumbnail ratio ratio-1x1 @CssClass" @attributes="AdditionalAttributes"></div>
+    <div role="img" style="background-image: url('@ThumbnailUrl');" class="album-thumbnail ratio ratio-1x1 @CssClass" @attributes="AdditionalAttributes"></div>
 }
 else
 {
@@ -12,14 +12,12 @@ else
 }
 
 @code {
-    [Parameter, EditorRequired]
-    public DriveItem Item { get; set; }
+    [Parameter]
+    public string? ThumbnailUrl { get; set; }
 
     [Parameter]
     public string? CssClass { get; set; }
     
     [Parameter(CaptureUnmatchedValues = true)]
     public IDictionary<string, object>? AdditionalAttributes { get; set; }
-
-    private string? url => Item?.Thumbnails?.CurrentPage?.Count > 0 ? Item.Thumbnails.CurrentPage[0].Large?.Url : null;
 }
