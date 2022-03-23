@@ -1,6 +1,54 @@
 ﻿self.assetsManifest = {
   "assets": [
     {
+      "hash": "sha256-g7Z6KaGxeeGqUf4aOR8k4kLIcJdoUEARlCTJBZ4AKg0=",
+      "url": "android-chrome-192x192.png"
+    },
+    {
+      "hash": "sha256-hhNLlpL3iMjctu\/g0P2QY\/XPgXXJ04C1cKjreb8my1U=",
+      "url": "android-chrome-512x512.png"
+    },
+    {
+      "hash": "sha256-IHvcwnR0nvG9NshjArNtCM2OFfzfRGCQnYrv0rzUdu8=",
+      "url": "apple-touch-icon-114x114.png"
+    },
+    {
+      "hash": "sha256-09gxIC4++Y2WNrnefg3ymrzI+2DplZch25ylHMh7Tm0=",
+      "url": "apple-touch-icon-120x120.png"
+    },
+    {
+      "hash": "sha256-b8YIhXr1TwOZv9r9\/2sRp5qvSao3CA2yK6jpn18M72U=",
+      "url": "apple-touch-icon-144x144.png"
+    },
+    {
+      "hash": "sha256-oDCoWY67zVs3Z2NKZwp86nuqnxDJoDarNw3EassfsL8=",
+      "url": "apple-touch-icon-152x152.png"
+    },
+    {
+      "hash": "sha256-EA8NAXVKU+oIcmk24fzyU8+hw8eumx\/K43aF49IqB28=",
+      "url": "apple-touch-icon-167x167.png"
+    },
+    {
+      "hash": "sha256-XkOKpqGCiVDdkAt9a+MiYzTJdn7S1KqUzEeHDkwLL84=",
+      "url": "apple-touch-icon-180x180.png"
+    },
+    {
+      "hash": "sha256-QapqtjcE+DP1lHO5XIG+mEDq\/OLcDXj4\/v5rGawj+Xg=",
+      "url": "apple-touch-icon-57x57.png"
+    },
+    {
+      "hash": "sha256-lW932vjkMCrVDhZI2Or9jlgf39LE1tv25hVefWHufD8=",
+      "url": "apple-touch-icon-60x60.png"
+    },
+    {
+      "hash": "sha256-sjmzP5APotmqX5BHayVGAsAGrPXz5DDZCR1gBNX3Qzw=",
+      "url": "apple-touch-icon-72x72.png"
+    },
+    {
+      "hash": "sha256-UM\/MGP6HibTy6n51bl8cKFd9XiiEugmIePHSbPG9YLM=",
+      "url": "apple-touch-icon-76x76.png"
+    },
+    {
       "hash": "sha256-jBAFzBow25xscUr6dLEINs\/CKZpb2cMI1T14mfXiyOA=",
       "url": "css\/app.css"
     },
@@ -49,8 +97,28 @@
       "url": "css\/open-iconic\/README.md"
     },
     {
-      "hash": "sha256-Jtxf9L+5ITKRc1gIRl4VbUpGkRNfOBXjYTdhJD4facM=",
-      "url": "favicon.ico"
+      "hash": "sha256-egTiK\/oiy2rH2l+5YX9uet7a1eRcjtNda33\/UBEh8nc=",
+      "url": "favicon-128x128.png"
+    },
+    {
+      "hash": "sha256-MoHIRXBK5yAX0M\/EZMktNBhsk\/UCTJcisRrbahmv4bU=",
+      "url": "favicon-16x16.png"
+    },
+    {
+      "hash": "sha256-uBeqUEwm9abJ2Y5gw34Ujx\/Icc+7bFpqpUzGKrUrv28=",
+      "url": "favicon-196x196.png"
+    },
+    {
+      "hash": "sha256-4Lgyspx1B64Nlm1oGrEiICxsWMp7saog7pGSuBGP\/18=",
+      "url": "favicon-32x32.png"
+    },
+    {
+      "hash": "sha256-DDT7ibEToTLDTFOFiuxiHLYoyZdl+DWYRwi9ocoAbzo=",
+      "url": "favicon-96x96.png"
+    },
+    {
+      "hash": "sha256-cEm9D9BShDOhvgRPjYlQJTNqEk8wBAxhw4cE2xkPT7s=",
+      "url": "favicon.svg"
     },
     {
       "hash": "sha256-DbpQaq68ZSb5IoPosBErM1QWBfsbTxpJqhU0REi6wP4=",
@@ -61,16 +129,72 @@
       "url": "icon-512.png"
     },
     {
-      "hash": "sha256-hSuynPo\/IIyOz0UOd07t9OmtfxeYoeWMOJnLDe918dA=",
+      "hash": "sha256-HCask9BZo7RS0zdU\/Qf1dawLq3Zh0M3fi88MF3fNGKQ=",
+      "url": "icon-wrapper-1.png"
+    },
+    {
+      "hash": "sha256-NVrIMq9KK8v27LhYnffGnJ\/6YXPmAfdHF4lU4QzkHf0=",
+      "url": "icon-wrapper-2.png"
+    },
+    {
+      "hash": "sha256-ZXZAFb7qUiXdz30HZCBrskhWQIkbUiDELE78217hGd8=",
+      "url": "icon-wrapper-3.png"
+    },
+    {
+      "hash": "sha256-grWf7LhNkkFSIaq6dwlmObpSy4WkApbNfBKh21+5Q1U=",
+      "url": "icon-wrapper-4.png"
+    },
+    {
+      "hash": "sha256-UzBSphhbhcLByjP\/bCckLfTRcGAghC\/2fazvuIJbySk=",
+      "url": "icon-wrapper-5.png"
+    },
+    {
+      "hash": "sha256-w8PNgPke3zz5W2P9JVP\/DNX1Ahz0shOd8VaG\/Jfdvj8=",
+      "url": "icon-wrapper-6.png"
+    },
+    {
+      "hash": "sha256-uBeqUEwm9abJ2Y5gw34Ujx\/Icc+7bFpqpUzGKrUrv28=",
+      "url": "icon-wrapper-7.png"
+    },
+    {
+      "hash": "sha256-egTiK\/oiy2rH2l+5YX9uet7a1eRcjtNda33\/UBEh8nc=",
+      "url": "icon-wrapper-8.png"
+    },
+    {
+      "hash": "sha256-dM0oiHWHgRE4wDcQxCVuii6oa5KGdsAfln+l43Nu+to=",
+      "url": "icon-wrapper.png"
+    },
+    {
+      "hash": "sha256-0zEP4nOXiKmI9pqmI6QKqXmbu7FtLZOx1yB5Tr4NzHU=",
       "url": "index.html"
     },
     {
-      "hash": "sha256-PkJTAarAx2IsRlM+Y3XOqidY6foE8nGJ\/N6oaLwinks=",
+      "hash": "sha256-3yi2aOxElor7HrHAddoKz\/I5VUfMgC2pQwoImaj6ByQ=",
       "url": "js\/player.js"
     },
     {
       "hash": "sha256-w9Ma\/GnpcRnzleNf5GqFl+BlWh\/NjMurMVBE6t7womw=",
       "url": "manifest.json"
+    },
+    {
+      "hash": "sha256-UzBSphhbhcLByjP\/bCckLfTRcGAghC\/2fazvuIJbySk=",
+      "url": "mstile-144x144.png"
+    },
+    {
+      "hash": "sha256-grWf7LhNkkFSIaq6dwlmObpSy4WkApbNfBKh21+5Q1U=",
+      "url": "mstile-150x150.png"
+    },
+    {
+      "hash": "sha256-YSyOrQvVXTEKABLY23Wo\/OOrLGTX+fKqC6luUCFtGq4=",
+      "url": "mstile-310x150.png"
+    },
+    {
+      "hash": "sha256-NVrIMq9KK8v27LhYnffGnJ\/6YXPmAfdHF4lU4QzkHf0=",
+      "url": "mstile-310x310.png"
+    },
+    {
+      "hash": "sha256-w8PNgPke3zz5W2P9JVP\/DNX1Ahz0shOd8VaG\/Jfdvj8=",
+      "url": "mstile-70x70.png"
     },
     {
       "hash": "sha256-4Yh4OTT5TEAPNyXEzOG+n5l2HPK294WFItz4SIelj88=",
@@ -113,7 +237,7 @@
       "url": "_framework\/icudt.dat"
     },
     {
-      "hash": "sha256-tllIrlFKG2Rt8\/pBNABiU0CnS6P5BS7VC4Y38BpX+sQ=",
+      "hash": "sha256-zZ3NHYuX+464Iv4zgBlrrfu8v+n4yGkqEcMwrx11yTI=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -121,7 +245,7 @@
       "url": "_framework\/Azure.Core.dll"
     },
     {
-      "hash": "sha256-tqIP2owAjrX3xIJ5MKGV47fYOt6TR7jYoi2Np3msu7I=",
+      "hash": "sha256-MzDTi14TRjXM4k41E1MRDGrSGqvKkdSe+Qb196X3\/jI=",
       "url": "_framework\/GrooveDrive.dll"
     },
     {
@@ -481,7 +605,7 @@
       "url": "_framework\/System.Text.Encodings.Web.dll"
     },
     {
-      "hash": "sha256-Q+6JigS+gnQtd6nQaUGo0Mtz95MvTJkBk5dkEY+Vh1A=",
+      "hash": "sha256-EYdbq5dV8JaSQlIfskPCl1XHWsCNWdrVDORjhxIsxNY=",
       "url": "_framework\/System.Text.Json.dll"
     },
     {
@@ -529,5 +653,5 @@
       "url": "_content\/Microsoft.Authentication.WebAssembly.Msal\/AuthenticationService.js"
     }
   ],
-  "version": "OWZVvTHB"
+  "version": "VqioFqHK"
 };

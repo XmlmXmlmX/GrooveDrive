@@ -10,7 +10,7 @@
   "resources": {
     "assembly": {
       "Azure.Core.dll": "sha256-eVGzHxrttPSW+6v57z0dtDkGjzEwfF6uy+w8BxXLIUw=",
-      "GrooveDrive.dll": "sha256-tqIP2owAjrX3xIJ5MKGV47fYOt6TR7jYoi2Np3msu7I=",
+      "GrooveDrive.dll": "sha256-MzDTi14TRjXM4k41E1MRDGrSGqvKkdSe+Qb196X3\/jI=",
       "Microsoft.AspNetCore.Authorization.dll": "sha256-X9vD5fuWWg1tLWDxY6cA4FVF+9HiWwKEeXwH4v8x+Ic=",
       "Microsoft.AspNetCore.Components.Authorization.dll": "sha256-SbR6F07j9q7Qn5lvtXd5XDgWDn0NRc+wDFK2OMPD1Ug=",
       "Microsoft.AspNetCore.Components.dll": "sha256-m3CYxLV\/0m0+K4m4E9vzsxY9YE\/1QAcV0b84pN4i5u0=",
@@ -100,7 +100,7 @@
       "System.Security.Principal.dll": "sha256-ZckkVD6xe6wne664Ldmg2W3pZzQINbYhSi5mxpqH7Bg=",
       "System.Text.Encoding.Extensions.dll": "sha256-cXjNQlwUPWIVideAzHfT04qpOIfbmtF3vZ\/NI5VzqlE=",
       "System.Text.Encodings.Web.dll": "sha256-I9H\/oBAXuKgbDZypJILfJASFnsQSvLdkNo\/vOKDBXBY=",
-      "System.Text.Json.dll": "sha256-Q+6JigS+gnQtd6nQaUGo0Mtz95MvTJkBk5dkEY+Vh1A=",
+      "System.Text.Json.dll": "sha256-EYdbq5dV8JaSQlIfskPCl1XHWsCNWdrVDORjhxIsxNY=",
       "System.Text.RegularExpressions.dll": "sha256-0QNwaKJsbWv8bqXzfDUOi0RSQ7akpCbiL+4LzYyiQ5s=",
       "System.Threading.dll": "sha256-vaIDENo0YyfhZZtSYirDghz5LUn+SXdEXGNxH91OUEw=",
       "System.Threading.Tasks.dll": "sha256-zo0Z8x\/sCDuZ7HaoOWqtQcvZWCa2l\/UC8pUU\/Gr+7oo=",
