@@ -15,7 +15,8 @@
     <main>
         <div class="top-row px-4 auth">
             <LoginDisplay />
-            <button class="btn btn-outline-secondary" @onclick="HandleStartSearchClick">Update Library</button>
+            <button class="btn btn-outline-secondary" @onclick="HandleRefreshClick">Refresh Library</button>
+            <button class="btn btn-outline-alert" @onclick="HandleDeleteIndexedDBClick">Clear Library</button>
         </div>
 
         <article class="content px-4">
@@ -43,7 +44,7 @@
 </div>
 
 @code {
-    private static Action<IEnumerable<Song>>? _pushSongsFromIndexedDBAction;
+    private DotNetObjectReference<MainLayout>? objRef;
 
     private bool showDialog = false;
     private bool crawling = false;
@@ -52,28 +53,29 @@
     private const string INDEXEDDB_KEYPATH = "driveId";
     private static IEnumerable<string> INDEXEDDB_INDEXES = new [] { "artist", "album", "albumArtist", "composers", "year", "title", "fileName" };
     private const int INDEXEDDB_VERSION = 2;
-
-    [JSInvokable("ReceiveSongsFromIndexedDB")]
-    public static void ReceiveSongsFromIndexedDBInvokable(IEnumerable<Song> songs)
-    {
-        _pushSongsFromIndexedDBAction?.DynamicInvoke(songs);
-    }
-
-    private void PushSongsFromIndexedDB(IEnumerable<Song> songs)
-    {
-        _playerState.SetSongsFromIndexedDB(songs);
-        showDialog = false;
-    }
+    private const string INDEXEDDB_DELETED_RESPONSE_JS_FUNCTION_NAME = "onIndexedDBDeletedResponse";
+    private const string SONGS_FROM_INDEXEDDB_RESPONSE_JS_FUNCTION_NAME = "onSongsFromIndexedDBResponse";
 
     protected override async Task OnInitializedAsync()
     {
-        _pushSongsFromIndexedDBAction += PushSongsFromIndexedDB;
-
         if (!_playerState.SongsLoadedFromIndexedDB || _playerState.AllSongs?.Count <= 0)
         {
-            await _js.InvokeVoidAsync("GrooveDrive.indexedDB.init", INDEXEDDB_NAME, INDEXEDDB_TABLE_ID, INDEXEDDB_KEYPATH, INDEXEDDB_VERSION);
+            objRef = DotNetObjectReference.Create(this);
+            await _js.InvokeVoidAsync("GrooveDrive.indexedDB.init", objRef, SONGS_FROM_INDEXEDDB_RESPONSE_JS_FUNCTION_NAME, INDEXEDDB_NAME, INDEXEDDB_TABLE_ID, INDEXEDDB_KEYPATH, INDEXEDDB_VERSION);
+
             showDialog = true;
         }
+    }
+
+    private async Task HandleRefreshClick()
+    {
+        await DeleteIndexedDB();
+        await HandleStartSearchClick();
+    }
+
+    private async Task HandleDeleteIndexedDBClick()
+    {
+        await DeleteIndexedDB();
     }
 
     private async Task HandleStartSearchClick()
@@ -126,5 +128,37 @@
             _playerState.AddSongs(_songsInner);
             await _js.InvokeVoidAsync("GrooveDrive.indexedDB.add", INDEXEDDB_TABLE_ID, _songsInner);
         }
+    }
+
+    private async Task DeleteIndexedDB()
+    {
+        objRef = DotNetObjectReference.Create(this);
+        var result = await _js.InvokeAsync<bool>("GrooveDrive.indexedDB.delete", objRef, INDEXEDDB_DELETED_RESPONSE_JS_FUNCTION_NAME, INDEXEDDB_NAME);
+
+        if (result)
+        {
+            StateHasChanged();
+        }
+    }
+    
+    [JSInvokable(SONGS_FROM_INDEXEDDB_RESPONSE_JS_FUNCTION_NAME)]
+    public void SongsFromIndexedDBResponse(IEnumerable<Song> songs)
+    {
+        _playerState.SetSongsFromIndexedDB(songs);
+        showDialog = false;
+    }
+
+    [JSInvokable(INDEXEDDB_DELETED_RESPONSE_JS_FUNCTION_NAME)]
+    public void OnIndexedDBDeletedResponse(bool success)
+    {
+        if (success)
+        {
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        objRef?.Dispose();
     }
 }
