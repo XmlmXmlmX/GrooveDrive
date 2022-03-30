@@ -9,14 +9,12 @@
 
 <div class="page">
     <div class="sidebar">
-        <NavMenu />
+        <NavMenu HandleDeleteIndexedDBClick="HandleDeleteIndexedDBClick" HandleRefreshClick="HandleRefreshClick" />
     </div>
 
     <main>
         <div class="top-row px-4 auth">
             <LoginDisplay />
-            <button class="btn btn-outline-secondary" @onclick="HandleRefreshClick">Refresh Library</button>
-            <button class="btn btn-outline-alert" @onclick="HandleDeleteIndexedDBClick">Clear Library</button>
         </div>
 
         <article class="content px-4">

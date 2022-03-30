@@ -69,10 +69,10 @@
             <span> of </span>
             <span>@durationFormat</span>
         </div>
-        <div class="progress" style="height: 3px;">
+        <div class="progress d-none d-md-flex" style="height: 3px;">
             <div class="progress-bar" role="progressbar" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100" style="width: @(progress)%; transition: 2.5s linear;"></div>
         </div>
-        <audio id="player" controls="controls" class="w-100 d-none" autoplay="autoplay" loop="@(_playerState.AllSongs?.Count() == 1 && _playerState.Repeat)" onended="@(_playerState.Repeat ? "DotNet.invokeMethod('GrooveDrive', 'NextTrackInvokable')" : "")" ontimeupdate="DotNet.invokeMethod('GrooveDrive', 'UpdateProgressInvokable', this.currentTime, this.duration)"></audio>
+        <audio id="player" controls="controls" class="w-100 d-md-none" autoplay="autoplay" loop="@(_playerState.AllSongs?.Count() == 1 && _playerState.Repeat)" onended="@(_playerState.Repeat ? "DotNet.invokeMethod('GrooveDrive', 'NextTrackInvokable')" : "")" ontimeupdate="DotNet.invokeMethod('GrooveDrive', 'UpdateProgressInvokable', this.currentTime, this.duration)"></audio>
     </div>
 </div>
 

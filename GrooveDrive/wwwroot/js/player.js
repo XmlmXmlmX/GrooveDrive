@@ -80,21 +80,23 @@ GrooveDrive.indexedDB.init = (instance, callbackMethod, dbName, tableId, keyPath
     };
 };
 
-GrooveDrive.indexedDB.add = (instance, callbackMethod, tableId, data) => {
-    console.log(`Adding ${data.length} items to table '${tableId}'...`);
-    data.forEach((value) => {
-        var request = GrooveDrive.indexedDB.db.transaction([tableId], "readwrite")
-            .objectStore(tableId)
-            .add(value);
+GrooveDrive.indexedDB.add = (tableId, data) => {
+    if (data && data.length > 0) {
+        console.log(`Adding ${data.length} items to table '${tableId}'...`);
+        data.forEach((value) => {
+            var request = GrooveDrive.indexedDB.db.transaction([tableId], "readwrite")
+                .objectStore(tableId)
+                .add(value);
 
-        request.onsuccess = function (event) {
-            console.log(`'${value.driveId}' has been added to your database.`);
-        };
+            request.onsuccess = function (event) {
+                console.log(`'${value.driveId}' has been added to your database.`);
+            };
 
-        request.onerror = function (event) {
-            console.warn(`Unable to add data\r\n'${value.driveId}' already exists in your database!`);
-        }
-    });
+            request.onerror = function (event) {
+                console.warn(`Unable to add data\r\n'${value.driveId}' already exists in your database!`);
+            }
+        });
+    }
 };
 
 GrooveDrive.indexedDB.delete = (instance, callbackMethod, databaseName) => {

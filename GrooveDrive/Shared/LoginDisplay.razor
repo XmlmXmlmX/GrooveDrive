@@ -7,7 +7,10 @@
 <AuthorizeView>
     <Authorized>
         Hello, @context.User.Identity?.Name!
-        <button class="nav-link btn btn-link" @onclick="BeginLogout">Log out</button>
+        <button class="nav-link btn btn-link" @onclick="BeginLogout">
+            <span class="d-none d-md-flex">Log out</span>
+            <span class="oi oi-account-logout d-md-none" aria-hidden="true"></span>
+        </button>
     </Authorized>
     <NotAuthorized>
         <a href="authentication/login">Log in</a>

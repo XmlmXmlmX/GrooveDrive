@@ -38,6 +38,11 @@
                 <span class="badge rounded-pill bg-light text-dark ms-3">@_playerState?.Genres?.Count()</span>
             </NavLink>
         </div>
+        <hr />
+        <div class="nav-item px-3">
+            <button class="btn btn-sm btn-outline-secondary" @onclick="HandleRefreshClick">Refresh Library</button>
+            <button class="btn btn-sm btn-outline-danger" @onclick="HandleDeleteIndexedDBClick">Clear Library</button>
+        </div>
     </nav>
 </div>
 
@@ -55,4 +60,10 @@
     {
         _playerState.OnChange += StateHasChanged;
     }
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> HandleRefreshClick { get; set; }
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> HandleDeleteIndexedDBClick { get; set; }
 }
