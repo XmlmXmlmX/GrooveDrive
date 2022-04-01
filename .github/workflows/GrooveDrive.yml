@@ -11,7 +11,7 @@ env:
   DOTNET_CORE_VERSION: 6.0.x
   WORKING_DIRECTORY: GrooveDrive
 jobs:
-  build-and-deploy:
+  build-and-deploy-azure-webapp:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
@@ -38,3 +38,32 @@ jobs:
       with:
         name: webapp
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        
+  build-and-deploy-github-pages:
+    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+      - name: Restore
+        run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
+      - name: Build
+        run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+      - name: Test
+        run: dotnet test "${{ env.WORKING_DIRECTORY }}" --no-build
+      - name: Publish
+        run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+      - name: Change base-tag in index.html from / to GrooveDrive
+        run: sed -i 's/<base href="\/" \/>/<base href="\/GrooveDrive\/" \/>/g' '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/wwwroot/index.html'
+      - name: Add .nojekyll file
+        run: touch ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/wwwroot/.nojekyll
+      - name: copy index.html to 404.html
+        run: cp ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/wwwroot/index.html ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/wwwroot/404.html
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.2.5
+        with:
+          branch: gh-pages
+          folder: "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/wwwroot"
