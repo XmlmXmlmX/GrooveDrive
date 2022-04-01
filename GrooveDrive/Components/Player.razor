@@ -10,7 +10,7 @@
     @if (_playerState.CurrentSong is not null)
     {
         <AlbumThumbnail ThumbnailUrl="@_playerState.CurrentSong.ThumbnailUrl" CssClass="fixed-bottom" />
-        <div class="fixed-bottom bg-secondary d-flex flex-column p-2 current-song-info">
+        <div class="fixed-bottom bg-secondary w-100 w-md-auto d-flex flex-column p-2 current-song-info">
             <span class="fs-5">@_playerState.CurrentSong.GetTitle()</span>
             @if (!string.IsNullOrWhiteSpace(_playerState.CurrentSong.Artist))
             {
@@ -24,7 +24,7 @@
     {
         <div class="album-thumbnail fixed-bottom"></div>
     }
-    <div class="fixed-bottom d-flex flex-column flex-grow-1">
+    <div class="fixed-bottom d-flex flex-column flex-grow-1 bg-dark">
         <div class="d-flex justify-content-center p-3 player-menu">
             <button type="button" class="btn btn-link @(_playerState.Random ? "text-primary" : "text-light")" @onclick="@(() => _playerState.ToggleRandom())">
                 <span class="oi oi-random"></span>

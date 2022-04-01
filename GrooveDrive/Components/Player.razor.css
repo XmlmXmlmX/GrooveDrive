@@ -1,6 +1,7 @@
 ﻿.player ::deep .album-thumbnail {
-    height: 15.5rem;
-    width: 15.5rem;
+    height: 17vw;
+    width: 17vw;
+    max-width: 15.55rem;
 }
 
 .player ::deep .album-thumbnail:hover::after {
@@ -24,7 +25,9 @@
 }
 
 .current-song-info {
-    width: 15.5rem;
+    height: 17vw;
+    width: 17vw;
+    max-width: 15.55rem;
     --bs-bg-opacity: .5;
     overflow: hidden;
     z-index: 1031;
