@@ -1,6 +1,5 @@
 ﻿@using Microsoft.Graph
 
-
 <div class="col">
     <NavLink href="@Href" @onclick="OnClick" class="@CssClasses">
         <AlbumThumbnail ThumbnailUrl="@ThumbnailUrl" CssClass="card-img-top song-list-item-thumbnail" />
@@ -38,7 +37,7 @@
     [Parameter]
     public Action? ClickHandler { get; set; }
 
-    private const string CSS_CLASSES = "card text-white bg-dark position-relative";
+    private const string CSS_CLASSES = "card tebg-light text-dark position-relative";
 
     private string? CssClasses => IsFolder is true ? $"is-folder {CSS_CLASSES}" : CSS_CLASSES;
 
