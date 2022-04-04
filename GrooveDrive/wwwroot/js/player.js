@@ -109,11 +109,10 @@ GrooveDrive.indexedDB.delete = (instance, callbackMethod, databaseName) => {
 
     req.onerror = function (ev) {
         alert("Couldn't delete database");
-        instance.invokeMethodAsync(callbackMethod, false);
     };
 
     req.onblocked = function (ev) {
-        alert("Couldn't delete database due to the operation being blocked");
-        instance.invokeMethodAsync(callbackMethod, false);
+        GrooveDrive.indexedDB.db.close();
+        GrooveDrive.indexedDB.delete(instance, callbackMethod, databaseName);
     };
 };

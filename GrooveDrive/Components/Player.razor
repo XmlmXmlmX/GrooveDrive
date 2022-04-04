@@ -48,7 +48,7 @@
                 switch (_playerState.CurrentPlayState)
                 {
                     case PlayerStateType.Play:
-                        <button type="button" class="btn btn-link d-none d-md-flex" @onclick="Pause">
+                        <button type="button" class="btn btn-link d-none d-md-block" @onclick="Pause">
                             <span role="button" title="Pause" class="oi oi-media-pause"></span>
                             <span class="visually-hidden">Pause</span>
                         </button>
@@ -56,7 +56,7 @@
                     case PlayerStateType.Pause:
                     case PlayerStateType.Stop:
                     case PlayerStateType.Unset:
-                        <button type="button" class="btn btn-link d-none d-md-flex" @onclick="Play">
+                        <button type="button" class="btn btn-link d-none d-md-block" @onclick="Play">
                             <span role="button" title="Play" class="oi oi-play-circle fs-1"></span>
                             <span class="visually-hidden">Play</span>
                         </button>
@@ -85,7 +85,7 @@
     private TimeSpan t2 => TimeSpan.FromSeconds(_currentTime);
     private int progress => (int)((Math.Round(_currentTime) * 100) / Math.Round(_duration));
     private bool showCurrentTime = true;
-    private string currentTime = showCurrentTime ? formatSongTime(t2) : formatSongTime(t1 - t2);
+    private string currentTime => showCurrentTime ? formatSongTime(t2) : formatSongTime(t1 - t2);
     private string formatSongTime(TimeSpan time) => string.Format("{0:D2}:{1:D2}:{2:D2}", time.Hours, time.Minutes, time.Seconds, time.Milliseconds);
 
     private async Task StreamCurrentSong()
@@ -100,7 +100,7 @@
         }
     }
 
-    private void UpdateProgress(float currentTime, float duration)
+    private void UpdateProgress(float currentTime = 0, float duration = 0)
     {
         _currentTime = currentTime;
         _duration = duration;
@@ -130,7 +130,7 @@
     }
 
     [JSInvokable]
-    public static void UpdateProgressInvokable(float currentTime, float duration)
+    public static void UpdateProgressInvokable(float currentTime = 0, float duration = 0)
     {
         _updateProgressAction?.DynamicInvoke(currentTime, duration);
     }
