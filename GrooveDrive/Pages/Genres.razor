@@ -1,0 +1,23 @@
+﻿@page "/Genres"
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Graph
+
+@attribute [Authorize]
+@inject PlayerState _playerState
+
+<PageTitle>Genres</PageTitle>
+
+@if (_playerState.IsLoading)
+{
+    <Spinner />
+}
+else
+{
+    <SongsContainer>
+        @foreach (var item in _playerState.Genres)
+        {
+            <SongListItem Title="@item.Key" ThumbnailUrl="@item.Value.ThumbnailUrl" Href="@($"/Genre/{item.Key}")" />
+        }
+    </SongsContainer>
+}

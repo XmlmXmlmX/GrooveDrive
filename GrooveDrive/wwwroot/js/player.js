@@ -1,4 +1,24 @@
 ﻿window.GrooveDrive = window.GrooveDrive || {};
+
+GrooveDrive._callbacker = function (callbackObjectInstance, callbackMethod, callbackId, cmd, args) {
+    var parts = cmd.split('.');
+    var targetFunc = window;
+    var parentObject = window;
+    for (var i = 0; i < parts.length; i++) {
+        if (i == 0 && part == 'window') continue;
+        var part = parts[i];
+        parentObject = targetFunc;
+        targetFunc = targetFunc[part];
+    }
+    args = JSON.parse(args);
+    args.push(function (e, d) {
+        var args = [];
+        for (var i in arguments) args.push(JSON.stringify(arguments[i]));
+        callbackObjectInstance.invokeMethodAsync(callbackMethod, callbackId, args);
+    });
+    targetFunc.apply(parentObject, args);
+};
+
 GrooveDrive.player = () => document.getElementById('player');
 GrooveDrive.streamItem = async function (contentStreamReference) {
     const arrayBuffer = await contentStreamReference.arrayBuffer();
@@ -12,7 +32,7 @@ GrooveDrive.pause = () => GrooveDrive.player().pause();
 GrooveDrive.createObject = (object, name) => GrooveDrive[name] = object;
 window.GrooveDrive.indexedDB = window.GrooveDrive.indexedDB || {};
 
-GrooveDrive.indexedDB.init = (dbName, tableId, keyPath, version) => {
+GrooveDrive.indexedDB.init = (instance, callbackMethod, dbName, tableId, keyPath, version) => {
     window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
     window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
     window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange
@@ -54,25 +74,45 @@ GrooveDrive.indexedDB.init = (dbName, tableId, keyPath, version) => {
                 cursor.continue();
             } else {
                 console.info(`Loading ${songs.length} songs from IndexedDB...`);
-                DotNet.invokeMethodAsync('GrooveDrive', 'ReceiveSongsFromIndexedDB', songs);
+                instance.invokeMethodAsync(callbackMethod, songs);
             }
         };
     };
 };
 
 GrooveDrive.indexedDB.add = (tableId, data) => {
-    console.log(`Adding ${data.length} items to table '${tableId}'...`);
-    data.forEach((value) => {
-        var request = GrooveDrive.indexedDB.db.transaction([tableId], "readwrite")
-            .objectStore(tableId)
-            .add(value);
+    if (data && data.length > 0) {
+        console.log(`Adding ${data.length} items to table '${tableId}'...`);
+        data.forEach((value) => {
+            var request = GrooveDrive.indexedDB.db.transaction([tableId], "readwrite")
+                .objectStore(tableId)
+                .add(value);
 
-        request.onsuccess = function (event) {
-            console.log(`'${value.driveId}' has been added to your database.`);
-        };
+            request.onsuccess = function (event) {
+                console.log(`'${value.driveId}' has been added to your database.`);
+            };
 
-        request.onerror = function (event) {
-            console.warn(`Unable to add data\r\n'${value.driveId}' already exists in your database!`);
-        }
-    });
+            request.onerror = function (event) {
+                console.warn(`Unable to add data\r\n'${value.driveId}' already exists in your database!`);
+            }
+        });
+    }
+};
+
+GrooveDrive.indexedDB.delete = (instance, callbackMethod, databaseName) => {
+    let req = indexedDB.deleteDatabase(databaseName);
+
+    req.onsuccess = function (ev) {
+        alert("Deleted database successfully");
+        instance.invokeMethodAsync(callbackMethod, true);
+    };
+
+    req.onerror = function (ev) {
+        alert("Couldn't delete database");
+    };
+
+    req.onblocked = function (ev) {
+        GrooveDrive.indexedDB.db.close();
+        GrooveDrive.indexedDB.delete(instance, callbackMethod, databaseName);
+    };
 };

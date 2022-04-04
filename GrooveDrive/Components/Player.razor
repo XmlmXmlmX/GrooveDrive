@@ -2,16 +2,15 @@
 @using Microsoft.Graph
 @using System.Text.Json
 @attribute [Authorize]
-
 @inject GraphServiceClient _graphClient
 @inject PlayerState _playerState
 @inject IJSRuntime _js
 
-<div class="fixed-bottom d-flex align-items-center justify-content-between">
+<div class="player d-flex">
     @if (_playerState.CurrentSong is not null)
     {
-        <AlbumThumbnail Item="_playerState.CurrentSong" CssClass="current-song-thumbnail me-3" />
-        <div class="d-flex flex-column">
+        <AlbumThumbnail ThumbnailUrl="@_playerState.CurrentSong.ThumbnailUrl" CssClass="fixed-bottom" />
+        <div class="fixed-bottom bg-secondary w-100 w-md-auto d-flex flex-column p-2 current-song-info">
             <span class="fs-5">@_playerState.CurrentSong.GetTitle()</span>
             @if (!string.IsNullOrWhiteSpace(_playerState.CurrentSong.Artist))
             {
@@ -23,9 +22,15 @@
     }
     else
     {
-        <div class="current-song-thumbnail"></div>
+        <div class="album-thumbnail fixed-bottom"></div>
     }
-    <div class="d-flex flex-column flex-grow-1">
+    <div class="fixed-bottom d-flex flex-column flex-grow-1 bg-dark">
+        <div class="d-none d-md-flex align-items-center">
+            <span class="p-3">@currentTime</span>
+            <div class="progress d-flex flex-grow-1" style="height: 3px;">
+                <div class="progress-bar" role="progressbar" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100" style="width: @(progress)%; transition: 2.5s linear;"></div>
+            </div>
+        </div>
         <div class="d-flex justify-content-center p-3 player-menu">
             <button type="button" class="btn btn-link @(_playerState.Random ? "text-primary" : "text-light")" @onclick="@(() => _playerState.ToggleRandom())">
                 <span class="oi oi-random"></span>
@@ -41,9 +46,9 @@
             }
             else {
                 switch (_playerState.CurrentPlayState)
-                {                
+                {
                     case PlayerStateType.Play:
-                        <button type="button" class="btn btn-link" @onclick="Pause">
+                        <button type="button" class="btn btn-link d-none d-md-block" @onclick="Pause">
                             <span role="button" title="Pause" class="oi oi-media-pause"></span>
                             <span class="visually-hidden">Pause</span>
                         </button>
@@ -51,13 +56,14 @@
                     case PlayerStateType.Pause:
                     case PlayerStateType.Stop:
                     case PlayerStateType.Unset:
-                        <button type="button" class="btn btn-link" @onclick="Play">
-                            <span role="button" title="Play" class="oi oi-media-play"></span>
+                        <button type="button" class="btn btn-link d-none d-md-block" @onclick="Play">
+                            <span role="button" title="Play" class="oi oi-play-circle fs-1"></span>
                             <span class="visually-hidden">Play</span>
                         </button>
                         break;
                 }
             }
+            <audio id="player" controls="controls" class="w-100 d-md-none" autoplay="autoplay" loop="@(_playerState.AllSongs?.Count() == 1 && _playerState.Repeat)" onended="@(_playerState.Repeat ? "DotNet.invokeMethod('GrooveDrive', 'NextTrackInvokable')" : "")" ontimeupdate="DotNet.invokeMethod('GrooveDrive', 'UpdateProgressInvokable', this.currentTime, this.duration)"></audio>
             <button type="button" class="btn btn-link">
                 <span role="button" title="Next" class="oi oi-media-step-forward" @onclick="Next"></span>
                 <span class="visually-hidden">Next</span>
@@ -67,18 +73,20 @@
                 <span class="visually-hidden">Loop</span>
             </button>
         </div>
-        <div class="progress" style="height: 1px;">
-            <div class="progress-bar" role="progressbar" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100" style="width: @progress"></div>
-        </div>
-        <audio id="player" controls="controls" class="w-100 d-none" autoplay="autoplay" loop="@(_playerState.AllSongs?.Count() == 1 && _playerState.Repeat)" onended="@(_playerState.Repeat ? "DotNet.invokeMethod('GrooveDrive', 'NextTrackInvokable')" : "")" ontimeupdate="DotNet.invokeMethod('GrooveDrive', 'UpdateProgressInvokable', this.currentTime, this.duration)"></audio>
     </div>
 </div>
 
 @code {
     private static Action? _nextTrackAction;
     private static Action<float, float>? _updateProgressAction;
-
-    private int progress = 0;
+    private float _currentTime = 0;
+    private float _duration = 0;
+    private TimeSpan t1 => TimeSpan.FromSeconds(_duration);
+    private TimeSpan t2 => TimeSpan.FromSeconds(_currentTime);
+    private int progress => (int)((Math.Round(_currentTime) * 100) / Math.Round(_duration));
+    private bool showCurrentTime = true;
+    private string currentTime => showCurrentTime ? formatSongTime(t2) : formatSongTime(t1 - t2);
+    private string formatSongTime(TimeSpan time) => string.Format("{0:D2}:{1:D2}:{2:D2}", time.Hours, time.Minutes, time.Seconds, time.Milliseconds);
 
     private async Task StreamCurrentSong()
     {
@@ -92,9 +100,11 @@
         }
     }
 
-    private void UpdateProgress(float currentTime, float duration)
+    private void UpdateProgress(float currentTime = 0, float duration = 0)
     {
-        progress = (int)((Math.Round(currentTime) * 100) / Math.Round(duration));
+        _currentTime = currentTime;
+        _duration = duration;
+        StateHasChanged();
     }
 
     private void Play()
@@ -120,7 +130,7 @@
     }
 
     [JSInvokable]
-    public static void UpdateProgressInvokable(float currentTime, float duration)
+    public static void UpdateProgressInvokable(float currentTime = 0, float duration = 0)
     {
         _updateProgressAction?.DynamicInvoke(currentTime, duration);
     }

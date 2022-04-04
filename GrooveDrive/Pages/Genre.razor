@@ -1,0 +1,31 @@
+﻿@page "/Genre/{name}"
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Graph
+
+@attribute [Authorize]
+@inject PlayerState _playerState
+
+<PageTitle>Artist - @Name</PageTitle>
+
+@if (_playerState.IsLoading)
+{
+    <Spinner />
+}
+else
+{
+    if (!string.IsNullOrWhiteSpace(Name) && _playerState.SongsByGenreName(Name) is not null)
+    {
+        <SongsContainer>
+            @foreach (var song in _playerState.SongsByGenreName(Name))
+            {
+                <SongListItem Title="@song.GetTitle()" Text="@($"{song.Album}\n{song.Artist}")" ThumbnailUrl="@song.ThumbnailUrl" ClickHandler="@(() => _playerState.Play(song))" />
+            }
+        </SongsContainer>
+    }
+}
+
+@code {
+    [Parameter]
+    public string? Name { get; set; }
+}
