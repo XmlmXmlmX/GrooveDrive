@@ -169,12 +169,12 @@ public class PlayerState
 
     private void NextRandom(List<Song>? songList = null)
     {
-        if (songList is null)
+        if (songList is null && songList.Count <= 0)
         {
             songList = AllSongs;
         }
 
-        if (songList is not null)
+        if (songList is not null && songList.Count > 0)
         {
             var random = new Random();
             int songIndex = random.Next(0, songList.Count);
